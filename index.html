@@ -559,67 +559,55 @@
                 max-width: 100%;
             }
 
-            .btn {
-                height: 21px;
-                line-height: 21px;
-                font-size: 9px;
-                padding: 0 9px;
-                min-width: auto;
+            /* Mobil cihazlarda 3 satırlı düzenleme */
+            .row {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
             }
 
-            .btn i {
-                font-size: 10.5px;
-                line-height: 21px;
-                margin-right: 4.5px;
+            .row .col {
+                width: 100%;
+                margin-bottom: 10px;
             }
 
-            .btn-floating {
-                width: 21px !important;
-                height: 21px !important;
-                line-height: 21px !important;
-            }
-
-            .btn-floating i {
-                font-size: 10.5px !important;
-                line-height: 21px !important;
-            }
-
-            #personTable tbody td .btn-floating {
-                width: 18px !important;
-                height: 18px !important;
-                line-height: 18px !important;
-            }
-
-            #personTable tbody td .btn-floating i {
-                font-size: 9px !important;
-                line-height: 18px !important;
-            }
-
-            #guideCollapsible ul li .btn-floating.tiny {
-                width: 14px !important;
-                height: 14px !important;
-                line-height: 14px !important;
-            }
-
-            #guideCollapsible ul li .btn-floating.tiny i {
-                font-size: 7.5px !important;
-                line-height: 14px !important;
-            }
-
-            #calendarTable th, #calendarTable td {
-                font-size: 12px;
-                padding: 5px !important;
-            }
-
-            header h3 {
-                font-size: 1.8rem;
+            .control-buttons .col.s12 {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
             }
 
             .control-buttons .btn {
-                margin-right: 10px !important;
+                width: 100%;
+                margin-bottom: 10px;
+                margin-right: 0 !important;
             }
 
-            .row {
+            #calendarContainer .row {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #calendarContainer .col {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            #calendarContainer .col.s3, 
+            #calendarContainer .col.s2 {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
+            #calendarContainer .switch-container {
+                width: 100%;
+                justify-content: center;
+            }
+
+            #calendarContainer .btn {
+                width: 100%;
                 margin-bottom: 10px;
             }
         }
@@ -737,22 +725,22 @@
                         <div style="overflow-x: hidden;">
                             <table id="calendarTable" class="striped"></table>
                         </div>
-                        <div class="row" style="margin-top: 20px; display: flex; justify-content: space-evenly; align-items: center; flex-wrap: wrap;">
+                        <div class="row" style="margin-top: 20px; display: flex; justify-content: space-evenly; align-items: center; flex-wrap: nowrap;">
                             <!-- İstenmeyen Gün Modu Butonu -->
-                              <div class="col s3" style="display: flex; align-items: center; justify-content: center;">
-                                  <div class="switch-container tooltipped" 
-                                      data-position="bottom" 
-                                      data-tooltip="İstenen gün/istenmeyen gün modları arasında geçiş yaparak hücrelerde işaretleme yapabilirsiniz">
-                                      <div class="switch">
-                                          <label style="display: flex; align-items: center;">
-                                              <span style="color: #000; margin-right: 10px; font-size: 1rem;">İstenmeyen Gün</span>
-                                              <input type="checkbox" id="modeSwitch" onchange="toggleAvailabilityMode()">
-                                              <span class="lever"></span>
-                                              <span style="color: #000; margin-left: 10px; font-size: 1rem;">İstenen Gün</span>
-                                          </label>
-                                      </div>
-                                  </div>
-                              </div>
+                            <div class="col s3" style="display: flex; align-items: center; justify-content: center;">
+                                <div class="switch-container tooltipped" 
+                                    data-position="bottom" 
+                                    data-tooltip="İstenen gün/istenmeyen gün modları arasında geçiş yaparak hücrelerde işaretleme yapabilirsiniz">
+                                    <div class="switch">
+                                        <label style="display: flex; align-items: center;">
+                                            <span style="color: #000; margin-right: 10px; font-size: 1rem;">İstenmeyen Gün</span>
+                                            <input type="checkbox" id="modeSwitch" onchange="toggleAvailabilityMode()">
+                                            <span class="lever"></span>
+                                            <span style="color: #000; margin-left: 10px; font-size: 1rem;">İstenen Gün</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                             
                             <!-- Cumaları Dengele Checkbox -->
                             <div class="col s2" style="display: flex; align-items: center; justify-content: center;">
@@ -766,40 +754,40 @@
                             
                             <!-- Otomatik Ata -->
                             <div class="col s2">
-                              <button class="waves-effect waves-light btn purple tooltipped" 
-                                      onclick="autoAssignDuties()" 
-                                      style="min-width: 180px; white-space: nowrap; padding: 0 10px;" 
-                                      data-position="bottom" 
-                                      data-tooltip="<i class='material-icons tooltip-icon'>undo</i> ve <i class='material-icons tooltip-icon'>auto_fix_high</i> tuşu ile değişik atamalar deneyebilirsiniz">
-                                  <i class="material-icons left">auto_fix_high</i>Otomatik Ata
-                              </button>
-                          </div>
+                                <button class="waves-effect waves-light btn purple tooltipped" 
+                                    onclick="autoAssignDuties()" 
+                                    style="min-width: 180px; white-space: nowrap; padding: 0 10px;" 
+                                    data-position="bottom" 
+                                    data-tooltip="<i class='material-icons tooltip-icon'>undo</i> ve <i class='material-icons tooltip-icon'>auto_fix_high</i> tuşu ile değişik atamalar deneyebilirsiniz">
+                                    <i class="material-icons left">auto_fix_high</i>Otomatik Ata
+                                </button>
+                            </div>
                             
                             <!-- Geri-İleri -->
                             <div class="col s2">
-                              <div style="display: inline-flex; align-items: center; white-space: nowrap;">
-                                  <button id="undoBtn" class="waves-effect waves-light btn grey" onclick="undo()" disabled style="margin-left: 0;">
-                                      <i class="material-icons">undo</i>
-                                  </button>
-                                  <button id="redoBtn" class="waves-effect waves-light btn grey" onclick="redo()" disabled>
-                                      <i class="material-icons">redo</i>
-                                  </button>
-                                  <button id="clearBtn" class="waves-effect waves-light btn grey" onclick="clearCalendar()">
-                                      Temizle
-                                  </button>
-                              </div>
-                          </div>
+                                <div style="display: inline-flex; align-items: center; white-space: nowrap;">
+                                    <button id="undoBtn" class="waves-effect waves-light btn grey" onclick="undo()" disabled style="margin-left: 0;">
+                                        <i class="material-icons">undo</i>
+                                    </button>
+                                    <button id="redoBtn" class="waves-effect waves-light btn grey" onclick="redo()" disabled>
+                                        <i class="material-icons">redo</i>
+                                    </button>
+                                    <button id="clearBtn" class="waves-effect waves-light btn grey" onclick="clearCalendar()">
+                                        Temizle
+                                    </button>
+                                </div>
+                            </div>
                             
-                            <!-- İndir-->
-                           <div class="col s3">
-                            <button class="waves-effect waves-light btn teal tooltipped" 
-                                onclick="downloadSchedule()" 
-                                style="min-width: 180px; white-space: nowrap; padding: 0 10px;" 
-                                data-position="bottom" 
-                                data-tooltip="Nöbet listesini Excel formatında indirir">
-                                <i class="material-icons left">file_download</i>İndir
-                            </button>
-                        </div>
+                            <!-- İndir -->
+                            <div class="col s3">
+                                <button class="waves-effect waves-light btn teal tooltipped" 
+                                    onclick="downloadSchedule()" 
+                                    style="min-width: 180px; white-space: nowrap; padding: 0 10px;" 
+                                    data-position="bottom" 
+                                    data-tooltip="Nöbet listesini Excel formatında indirir">
+                                    <i class="material-icons left">file_download</i>İndir
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </li>
