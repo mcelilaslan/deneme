@@ -559,28 +559,34 @@
                 max-width: 100%;
             }
 
-            .custom-container .input-field {
-                    text-align: left;
-                    display: flex;
-                    justify-content: flex-start;
-                }
-            
-                .custom-container .input-field input {
-                    width: 100%;
-                    text-align: left;
-                }
-            
-                /* İkinci konteynırdaki personel adı input alanını sola daya */
-                #personelCollapsible .input-field.col.s8 {
-                    text-align: left;
-                    display: flex;
-                    justify-content: flex-start;
-                }
-            
-                #personelCollapsible .input-field.col.s8 input {
-                    width: 100%;
-                    text-align: left;
-                }
+            .custom-container .row .input-field {
+                margin-left: 0 !important; /* Varsayılan marginleri sıfırla */
+                padding-left: 0 !important; /* Sol padding'i sıfırla */
+                text-align: left !important; /* Metni sola hizala */
+                display: block !important; /* Flex yerine block kullanarak kontrolü ele al */
+                width: 100% !important; /* Tam genişlik */
+            }
+        
+            .custom-container .row .input-field input {
+                text-align: left !important; /* Input içindeki metni sola hizala */
+                margin-left: 0 !important; /* Input'un sol boşluğunu sıfırla */
+                width: 100% !important; /* Input genişliğini tam yap */
+            }
+        
+            /* İkinci konteynırdaki personel adı input alanını sola daya */
+            #personelCollapsible .row .input-field.col.s8 {
+                margin-left: 0 !important; /* Sol margin'i sıfırla */
+                padding-left: 0 !important; /* Sol padding'i sıfırla */
+                text-align: left !important; /* Metni sola hizala */
+                display: block !important; /* Flex yerine block kullan */
+                width: 100% !important; /* Tam genişlik */
+            }
+        
+            #personelCollapsible .row .input-field.col.s8 input {
+                text-align: left !important; /* Input içindeki metni sola hizala */
+                margin-left: 0 !important; /* Sol boşluğu sıfırla */
+                width: 100% !important; /* Input genişliğini tam yap */
+            }
 
             /* Mobil cihazlarda 3 satırlı düzenleme */
             .row {
