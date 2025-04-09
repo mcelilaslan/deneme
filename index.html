@@ -549,7 +549,7 @@
             max-width: 400px;
         }
 
-        @media only screen and (max-width: 600px) {
+        @media only screen and (max-width: 800px) {
             .custom-container {
                 max-width: 100%;
                 padding: 10px;
@@ -558,6 +558,29 @@
             .custom-container.expanded {
                 max-width: 100%;
             }
+
+            .custom-container .input-field {
+                    text-align: left;
+                    display: flex;
+                    justify-content: flex-start;
+                }
+            
+                .custom-container .input-field input {
+                    width: 100%;
+                    text-align: left;
+                }
+            
+                /* İkinci konteynırdaki personel adı input alanını sola daya */
+                #personelCollapsible .input-field.col.s8 {
+                    text-align: left;
+                    display: flex;
+                    justify-content: flex-start;
+                }
+            
+                #personelCollapsible .input-field.col.s8 input {
+                    width: 100%;
+                    text-align: left;
+                }
 
             /* Mobil cihazlarda 3 satırlı düzenleme */
             .row {
