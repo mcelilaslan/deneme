@@ -325,22 +325,29 @@
             padding: 5px !important; 
         }
 
+       .button-group {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Butonlar arası boşluk */
+        }
+        
         .grouping-container {
             display: flex;
             align-items: center;
             margin-left: 10px;
-            height: 36px; /* Butonlarla aynı yükseklik */
+            height: 30px; /* Butonlarla uyumlu yükseklik */
         }
         
         .grouping-label {
             display: flex;
             align-items: center;
-            font-size: 14px;
+            font-size: 13px; /* Daha küçük yazı boyutu */
             color: #374151;
+            white-space: nowrap; /* Metnin satır atlamasını engelle */
         }
         
         .grouping-label span {
-            margin-left: 8px;
+            margin-left: 6px; /* Switch ile metin arası boşluk */
         }
 
         #guideCollapsible {
@@ -556,11 +563,20 @@
         }
 
         .btn-floating {
-            transition: 0.5s !important;
-            width: 36px;
-            height: 36px;
-            line-height: 36px;
-            margin: 0 5px;
+            width: 30px !important; /* Sabit genişlik */
+            height: 30px !important; /* Sabit yükseklik */
+            line-height: 30px !important; /* Hizalı ikon */
+            margin: 0 !important; /* Varsayılan marginleri sıfırla */
+            padding: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.5s;
+        }
+        
+        .btn-floating i {
+            font-size: 16px !important; /* İkon boyutu */
+            line-height: 30px !important;
         }
 
         .btn-floating:hover {
@@ -661,13 +677,28 @@
                 width: 100%;
                 margin-bottom: 10px;
             }
+            .button-group {
+                gap: 5px; /* Daha az boşluk */
+            }
+        
             .grouping-container {
                 margin-left: 5px;
+                height: 28px; /* Mobil için daha küçük */
             }
+        
+            .grouping-label {
+                font-size: 12px; /* Mobil için daha küçük yazı */
+            }
+        
             .btn-floating {
-                width: 30px;
-                height: 30px;
-                line-height: 30px;
+                width: 28px !important;
+                height: 28px !important;
+                line-height: 28px !important;
+            }
+        
+            .btn-floating i {
+                font-size: 14px !important;
+                line-height: 28px !important;
             }
         }
     </style>
@@ -737,19 +768,20 @@
                             <input type="text" id="personName" placeholder="Personel Adı Giriniz">
                         </div>
                         <div class="col s4" style="display: flex; justify-content: flex-start; align-items: center;">
-                            <a class="btn-floating waves-effect waves-light teal" onclick="addPerson()" style="margin-right: 10px;">
-                                <i class="material-icons">add</i>
-                            </a>
-                            <a class="dropdown-trigger btn-floating waves-effect waves-light grey tooltipped" href="#" data-target="personnelDropdown" data-position="top" data-tooltip="Hazırladığınız liste varsa, csv formatında yükleyebilirsiniz">
-                                <i class="material-icons">more_vert</i>
-                            </a>
+                            <div class="button-group" style="display: flex; align-items: center;">
+                                <a class="btn-floating waves-effect waves-light teal tooltipped" onclick="addPerson()" data-position="top" data-tooltip="Personel Ekle" style="margin-right: 10px;">
+                                    <i class="material-icons">add</i>
+                                </a>
+                                <a class="dropdown-trigger btn-floating waves-effect waves-light grey tooltipped" href="#" data-target="personnelDropdown" data-position="top" data-tooltip="Personel Listesi Yükle/İndir">
+                                    <i class="material-icons">more_vert</i>
+                                </a>
+                            </div>
                             <ul id="personnelDropdown" class="dropdown-content">
                                 <li><a onclick="triggerFileUpload()">Personel Listesi Yükle</a></li>
-                               <li><a class="tooltipped" onclick="downloadPersonnel()" data-position="right" data-tooltip="Hazırladığınız listeyi daha sonra kullanmak üzere csv formatında indirebilirsiniz">Personel Listesini İndir</a></li>
+                                <li><a class="tooltipped" onclick="downloadPersonnel()" data-position="right" data-tooltip="Hazırladığınız listeyi daha sonra kullanmak üzere csv formatında indirebilirsiniz">Personel Listesini İndir</a></li>
                             </ul>
                             <input type="file" id="csvUpload" accept=".csv" style="display: none;" onchange="uploadPersonnel(event)">
-                            <!-- Checkbox Eklenmesi -->
-                            <div id="groupingSwitch" class="grouping-container" style="display: none;">
+                            <div id="groupingSwitch" class="grouping-container" style="display: none; margin-left: 10px;">
                                 <label class="grouping-label">
                                     <input id="groupingCheckbox" type="checkbox" onchange="toggleGrouping()" />
                                     <span>Gruplama yapılacak mı?</span>
@@ -1186,17 +1218,21 @@
             <tbody id="personTable">
         `;
 
-        // Grup sayısını personel sayısına göre hesapla (persons.length / 2, yukarı yuvarla)
         const groupCount = Math.ceil(persons.length / 2);
+        console.log('Group Count:', groupCount); // Hata ayıklamak için
 
         persons.forEach((person, index) => {
+            let groupOptions = '<option value="0">Grup Seç</option>';
+            for (let i = 1; i <= groupCount; i++) {
+                groupOptions += `<option value="${i}" ${person.group === i ? 'selected' : ''}>${i}</option>`;
+            }
+
             html += `
                 <tr style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; background-color: #f9fafb; transition: background-color 0.2s;">
                     ${groupingEnabled && groupCount > 0 ? `
                         <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                            <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px;" onchange="updateGroup(${index}, this.value)">
-                                <option value="0">Grup Seç</option>
-                                ${Array.from({ length: groupCount }, (_, i) => `<option value="${i + 1}" ${person.group === i + 1 ? 'selected' : ''}>${i + 1}</option>`).join('')}
+                            <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px; width: 60px;" onchange="updateGroup(${index}, this.value)">
+                                ${groupOptions}
                             </select>
                         </td>
                     ` : ''}
