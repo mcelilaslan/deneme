@@ -1620,9 +1620,10 @@
         
             alertDiv.innerHTML = `
                 <div class="card-content white-text center-align" style="padding: 12px;">
-                    <span style="font-weight: bold; font-size: 1rem; display: block; margin-bottom: 6px;">
+                    <span style="font-weight: bold; font-size: 1rem; display: block; margin-bottom: 8px;">
                         Takvim oluşturuldu ve nöbetler dengeli dağıtıldı!<br>
-                        Seçimlerinizi yaparak <span style="color: #e040fb;">‘Otomatik Ata’</span> tuşuna basınız.
+                        Dağıtımı kendiniz de değiştirebilirsiniz!<br>
+                        Takvimde seçimlerinizi yaparak <span style="color: #e040fb;">‘Otomatik Ata’</span> tuşuna basınız.
                     </span>
                 </div>
                 <div style="display: flex; justify-content: center; padding-bottom: 8px;">
@@ -1673,7 +1674,7 @@
                 // 2 saniye sonra efekti kaldır
                 setTimeout(() => {
                     input.classList.remove('glow');
-                }, 4000);
+                }, 4500);
             });
         }
 
