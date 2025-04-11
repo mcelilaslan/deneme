@@ -676,7 +676,24 @@
             margin: 0 !important;
             padding-left: 15px !important;
         }
-    
+        @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-5px);
+        }
+        }
+        
+        .bounce {
+            animation: bounce 1s infinite;
+        }
+
+
+
         /* Mobil Stiller */
         @media only screen and (max-width: 900px) {
             .custom-container {
@@ -771,12 +788,19 @@
             }
 
             #calendarAlert .card-content span {
-                    font-size: 0.9rem !important;
-                    line-height: 1.3;
-                }
-                #calendarAlert .material-icons {
-                    font-size: 18px !important;
-                }
+                font-size: 0.9rem !important;
+                line-height: 1.3;
+            }
+            
+            #calendarAlert .btn-floating {
+                width: 36px !important;
+                height: 36px !important;
+                line-height: 36px !important;
+            }
+            
+            #calendarAlert .material-icons {
+                font-size: 24px !important;
+                line-height: 36px !important;
             }
             
             .grouping-container {
@@ -1439,6 +1463,7 @@
 
 
        
+                
         function showCustomAlert() {
             // Mevcut uyarıyı kaldır
             const existingAlert = document.querySelector('#calendarAlert');
@@ -1451,7 +1476,7 @@
             alertDiv.style.position = 'fixed';
             alertDiv.style.width = '90%';
             alertDiv.style.maxWidth = '400px';
-            alertDiv.style.zIndex = '10001'; // Footer ve diğer öğelerin üstünde
+            alertDiv.style.zIndex = '10001';
             alertDiv.style.margin = '0';
             alertDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
         
@@ -1472,7 +1497,11 @@
                         Takvim oluşturuldu ve nöbetler dengeli dağıtıldı!<br>
                         Seçimlerinizi yaparak <span style="color: #e040fb;">‘Otomatik Ata’</span> tuşuna basınız.
                     </span>
-                    <i class="material-icons" style="font-size: 30px; display: block; margin: 0 auto;">arrow_downward</i>
+                </div>
+                <div style="display: flex; justify-content: center; padding-bottom: 8px;">
+                    <a class="btn-floating teal bounce" style="width: 40px; height: 40px; line-height: 40px;">
+                        <i class="material-icons" style="font-size: 30px; line-height: 40px; color: white;">arrow_downward</i>
+                    </a>
                 </div>
             `;
         
@@ -1488,14 +1517,14 @@
                         if (alertDiv.parentNode) alertDiv.remove();
                     }, 300);
                 }
-            }, 3000);
+            }, 4000);
         
-            // Mobil cihazlarda takvimi görünür yap (değişmedi)
+            // Mobil cihazlarda takvimi görünür yap
             if (isMobileDevice()) {
                 setTimeout(() => {
                     const calendarContainer = document.getElementById('calendarContainer');
                     calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 500);
+                }, 300);
             }
         }
 
