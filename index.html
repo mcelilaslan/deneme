@@ -575,6 +575,22 @@
             font-size: 12px;
             margin-left: 5px;
         }
+
+        .grouping-label[data-tooltip]:hover:after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            white-space: nowrap;
+            z-index: 1000;
+        }
     
         /* Select ve Input Hizalaması (Masaüstü için) */
         .standalone-select-wrapper {
@@ -881,7 +897,7 @@
                             </div>
                             <!-- Checkbox buraya taşındı -->
                             <div id="groupingSwitch" class="grouping-container" style="margin-bottom: 15px;">
-                                <label class="grouping-label">
+                                <label class="grouping-label" data-tooltip="Birlikte nöbetçi olması gereken kişileri sol taraftan aynı gruba eklemeniz yeterli">
                                     <input id="groupingCheckbox" type="checkbox" onchange="toggleGrouping()" />
                                     <span>Birlikte nöbet tutması gerekenler var mı?</span>
                                 </label>
@@ -1066,7 +1082,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Materialize başlatma, ancak select hariç
+            
             const elems = document.querySelectorAll('.collapsible, .datepicker, .dropdown-trigger, .modal');
             M.Collapsible.init(document.querySelectorAll('.collapsible'), { accordion: false });
             M.Datepicker.init(document.querySelectorAll('.datepicker'), {
@@ -1096,11 +1112,13 @@
             });
             M.Modal.init(document.querySelectorAll('.modal'));
         
+            // Collapsible örneklerini tanımlama
             collapsiblePersonel = M.Collapsible.getInstance(document.querySelector('#personelCollapsible'));
             collapsibleCalendar = M.Collapsible.getInstance(document.querySelector('#calendarCollapsible'));
             statsCollapsible = M.Collapsible.getInstance(document.querySelector('#statsCollapsible'));
             guideCollapsible = M.Collapsible.getInstance(document.querySelector('#guideCollapsible'));
         
+            // Takvim collapsible'ı için açma/kapama ayarları
             collapsibleCalendar.options.onOpenStart = function() {
                 document.getElementById('calendarContainer').classList.add('expanded');
             };
@@ -1108,6 +1126,7 @@
                 document.getElementById('calendarContainer').classList.remove('expanded');
             };
         
+            // Mobil cihazlar için buton boyutlarını ayarlama
             if (isMobileDevice()) {
                 document.querySelectorAll('.btn-floating').forEach(btn => {
                     btn.style.width = '36px';
@@ -1117,6 +1136,7 @@
                 M.toast({ html: 'Yatay modda daha iyi bir deneyim elde edebilirsiniz!(Masaüstü kullanım önerilir)' });
             }
         
+            // Tarih seçiciler için olay dinleyicileri
             const startDatePicker = document.getElementById('startDate');
             const endDatePicker = document.getElementById('endDate');
             startDatePicker.addEventListener('change', function() {
@@ -1139,6 +1159,7 @@
                 }
             });
         
+            // Enter tuşu dinleyicisi
             const personNameInput = document.getElementById('personName');
             if (personNameInput) {
                 personNameInput.addEventListener('keydown', function(event) {
@@ -1149,9 +1170,11 @@
                 });
             }
         
+            
             persons = [...defaultPersons];
             renderTable();
         
+            // CSV yükleme için olay dinleyicisi
             const csvUploadInput = document.getElementById('csvUpload');
             if (csvUploadInput) {
                 csvUploadInput.removeEventListener('change', uploadPersonnel);
@@ -1159,9 +1182,24 @@
             } else {
                 console.error('csvUpload input elementi bulunamadı!');
             }
+        
+            // Checkbox'ı varsayılan olarak gizleme
+            const groupingSwitch = document.getElementById('groupingSwitch');
+            groupingSwitch.style.display = 'none';
         });
 
-        // Tüm diğer fonksiyonlar buraya gelecek (addPerson, deletePerson, renderTable, vb.)
+        document.getElementById('dutyPerDay').addEventListener('change', function() {
+            const dutyPerDay = parseInt(this.value) || 0;
+            const groupingSwitch = document.getElementById('groupingSwitch');
+            if (dutyPerDay >= 2) {
+                groupingSwitch.style.display = 'block';
+            } else {
+                groupingSwitch.style.display = 'none';
+                document.getElementById('groupingCheckbox').checked = false;
+            }
+        });
+
+
         function saveToHistory() {
             const currentState = {
                 selectedCells: JSON.parse(JSON.stringify(selectedCells)),
