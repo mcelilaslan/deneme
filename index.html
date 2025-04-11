@@ -576,23 +576,7 @@
             margin-left: 5px;
         }
 
-        .grouping-label[data-tooltip]:hover:after {
-            content: attr(data-tooltip);
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-family: 'Bricolage Grotesque', sans-serif;
-            white-space: nowrap;
-            z-index: 1000;
-        }
-    
-        /* Select ve Input Hizalaması (Masaüstü için) */
+   
         .standalone-select-wrapper {
             position: relative;
             width: 100%;
@@ -895,18 +879,18 @@
                                     <input type="file" id="csvUpload" accept=".csv" style="display: none;" onchange="uploadPersonnel(event)">
                                 </div>
                             </div>
-                            <!-- Checkbox buraya taşındı -->
+                            <!-- Grup Checkbox-->
                             <div id="groupingSwitch" class="grouping-container" style="margin-bottom: 15px;">
-                                <label class="grouping-label" data-tooltip="Birlikte nöbetçi olması gereken kişileri sol taraftan aynı gruba eklemeniz yeterli">
+                                <label class="grouping-label tooltipped" data-position="top" data-tooltip="Birlikte nöbetçi olması gereken kişileri sol taraftan aynı gruba eklemeniz yeterli">
                                     <input id="groupingCheckbox" type="checkbox" onchange="toggleGrouping()" />
                                     <span>Birlikte nöbet tutması gerekenler var mı?</span>
                                 </label>
                             </div>
-                            <!-- "Henüz Personel Eklenmedi" -->
+                            <!-- "No Personel" -->
                             <div id="noPersonnelMessage" class="no-personnel-message" style="display: block;">
                                 Henüz Personel Eklenmedi
                             </div>
-                            <!-- Mevcut tablo korunuyor -->
+                           
                             <table class="striped" style="position: relative; display: none;" id="personnelTableContainer">
                                 <tbody id="personTable"></tbody>
                             </table>
@@ -937,7 +921,7 @@
                             <table id="calendarTable" class="striped"></table>
                         </div>
                         <div class="row" style="margin-top: 20px; display: flex; justify-content: space-evenly; align-items: center; flex-wrap: nowrap;">
-                            <!-- İstenmeyen Gün Modu Butonu -->
+                            <!-- İstenen/İstenmeyen Gün Switch -->
                             <div class="col s3" style="display: flex; align-items: center; justify-content: center;">
                                 <div class="switch-container tooltipped" 
                                     data-position="bottom" 
@@ -1186,6 +1170,8 @@
             // Checkbox'ı varsayılan olarak gizleme
             const groupingSwitch = document.getElementById('groupingSwitch');
             groupingSwitch.style.display = 'none';
+
+            M.Tooltip.init(document.querySelectorAll('.tooltipped'));
         });
 
         document.getElementById('dutyPerDay').addEventListener('change', function() {
