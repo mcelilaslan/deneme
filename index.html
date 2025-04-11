@@ -1031,15 +1031,7 @@
             statsCollapsible = M.Collapsible.init(document.querySelector('#statsCollapsible'), { accordion: false });
             guideCollapsible = M.Collapsible.init(document.querySelector('#guideCollapsible'), { accordion: false });
         
-            // Tüm select elementlerini Materialize ile başlat
-            const selects = document.querySelectorAll('select');
-            M.FormSelect.init(selects, {
-                dropdownOptions: {
-                    coverTrigger: false,
-                    constrainWidth: false
-                }
-            });
-        
+                   
             if (isMobileDevice()) {
                 document.querySelectorAll('.btn-floating').forEach(btn => {
                     btn.style.width = '36px';
