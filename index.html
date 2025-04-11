@@ -576,7 +576,7 @@
                 margin-left: 5px;
         }
 
-        .standalone-select-wrapper {
+       .standalone-select-wrapper {
             position: relative;
             width: 100%;
             max-width: 100%;
@@ -588,12 +588,12 @@
         }
         
         .standalone-select-wrapper .select-container select {
-            /* Materialize etkisini kaldırmak için */
-            appearance: none !important;
+            /* Materialize etkisini kaldırmak ve özel stil uygulamak için */
+            appearance: none !important; /* Varsayılan tarayıcı stilini kaldırır */
             display: block !important;
             width: 100% !important;
-            height: 120px !important; /* 4 seçenek için yükseklik */
-            padding: 10px 15px !important;
+            height: 40px !important; /* Dropdown için sabit yükseklik */
+            padding: 0 30px 0 15px !important; /* Sağda ok için boşluk */
             margin: 0 !important;
             font-size: 16px !important;
             font-family: 'Bricolage Grotesque', sans-serif !important;
@@ -601,10 +601,13 @@
             background-color: #ffffff !important;
             border: 2px solid #d1d5db !important;
             border-radius: 8px !important;
-            overflow-y: auto !important; /* Kaydırma çubuğu */
             cursor: pointer !important;
             box-sizing: border-box !important;
             transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+            /* Özel ok ikonu eklemek için */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%23707177" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: right 10px center !important;
         }
         
         .standalone-select-wrapper .select-container select:focus {
@@ -756,11 +759,11 @@
             }
 
            .standalone-select-wrapper {
-                margin-bottom: 20px;
+              margin-bottom: 20px;
             }
-            .standalone-select-wrapper .select-container select {
-                font-size: 14px !important;
-                height: 100px !important; /* Mobilde biraz daha küçük */
+           .standalone-select-wrapper .select-container select {
+              font-size: 14px !important;
+              height: 36px !important; /* Mobilde biraz daha küçük */
             }
         }
     </style>
@@ -815,7 +818,7 @@
               </div>
             <div class="standalone-select-wrapper col s6" data-tooltip="Bir nöbetteki kişi sayısı">
                     <div class="select-container">
-                        <select id="dutyPerDay" size="4">
+                        <select id="dutyPerDay">
                             <option value="" disabled selected>Seçiniz</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
@@ -1959,7 +1962,7 @@
             const dutyPerDayInput = document.getElementById('dutyPerDay').value.trim();
 
             if (!dutyPerDayInput || dutyPerDayInput === "") {
-                M.toast({ html: 'Kaçar kişinin nöbetçi olacağını belirleyiniz!' });
+                M.toast({ html: 'inin nöbetçi olacağını belirleyiniz!' });
                 return;
             }
 
