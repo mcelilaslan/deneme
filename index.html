@@ -15,6 +15,10 @@
     <title>Otomatik Nöbet Listesi Hazırlama Programı | Nobetplani.com</title>
     <meta name="description" content="Nobetplani.com ile tüm profesyoneller için saniyeler içinde otomatik nöbet listeleri hazırlayın. Kolay, hızlı ve hatasız vardiya planlama çözümü."> 
     <meta name="robots" content="index, follow">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
     <link rel="canonical" href="https://nobetplani.com/"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -340,7 +344,7 @@
     
         #guideCollapsible .collapsible-header {
             background-color: rgba(119,190,186,0.9) !important;
-            border-radius: 8px 8px 0 0;
+            border-radius: 0;
             border-bottom: none;
         }
     
@@ -765,6 +769,15 @@
                 white-space: nowrap;
                 margin-bottom: 10px;
             }
+
+            #calendarAlert .card-content span {
+                    font-size: 0.9rem !important;
+                    line-height: 1.3;
+                }
+                #calendarAlert .material-icons {
+                    font-size: 18px !important;
+                }
+            }
             
             .grouping-container {
                 margin-left: 0;
@@ -788,25 +801,25 @@
 </head>
 <body>
     <div class="container-wrapper">
-        <!-- "Nasıl Kullanılır" Konteynırı -->
+        <!-- "Kılavuz" Konteynırı -->
         <div class="custom-container">
             <ul class="collapsible" id="guideCollapsible">
                 <li>
-                    <div class="collapsible-header"><i class="material-icons">help_outline</i>Nasıl Kullanılır</div>
+                    <div class="collapsible-header"><i class="material-icons">help_outline</i>Kullanma Kılavuzu</div>
                     <div class="collapsible-body">
                         <ul>
                             <li>Masaüstü tarayıcıda optimal çalışmaktadır.</li>
                             <li>Nöbet yazılacak tarih aralığını ve 1 nöbette bulunacak kişi sayısını girerek süreci başlatınız.</li>
                             <li><a class="btn-floating tiny waves-effect waves-light teal"><i class="material-icons">add</i></a> simgesine tıklayarak listeye personel ekleyebilirsiniz.</li>
-                            <li>Birlikte nöbet tutmak isteyen/ tutması gereken personeller var aynı gruba ekleyerek aynı güne nöbetçi atanmalarını sağlayabilirsiniz</li>
+                            <li>Birlikte nöbet tutmak isteyen/ tutması gereken personeller varsa aynı gruba ekleyerek aynı güne nöbetçi atanmalarını sağlayabilirsiniz</li>
                             <li><a class="btn-floating tiny waves-effect waves-light grey"><i class="material-icons">more_vert</i></a>tuşu ile oluşturduğunuz personel listesini indirebilir, sonraki kullanımlarda yükleyerek süreci hızlandırabilirsiniz.</li>
                             <li>Nöbet sayılarını "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbet dağıt ve Takvim oluştur" tuşu ile otomatik dağıtabilir veya kendiniz dağıtabilirsiniz.</li>
-                            <li>Kişilere ayrı ayrı Hafta içi/sonu nöbet sayıları belirleyebilirsiniz.</li>
-                            <li>Nöbet ertesi en az boşluk toplu veya kişiye özel olabilir.</li>
+                            <li>Kişilere ayrı ayrı hafta içi / hafta sonu nöbet sayıları belirleyebilirsiniz.</li>
+                            <li>İki nöbet arası en az boşluk toplu veya kişiye özel olabilir.</li>
                             <li>Personel planı bittiğinde "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbet dağıt ve Takvim oluştur" tuşuna basınız.</li>
                             <li>Cuma günlerini de dengelemek isterseniz ilgili kutucuğu tikleyiniz.</li>
                             <li>Varsa <font color="red">istenmeyen ✖</font>/<font color="green">istenen ✓</font> günleri takvim üzerinde işaretleyerek "<a class="btn-floating tiny waves-effect waves-light purple"><i class="material-icons">auto_fix_high</i></a>Otomatik Ata" tuşuna basınız.</li>
-                            <li>Geri al tuşu ile takvimdeki son değişikliği geri alabilirsiniz. Temizle butonu takvimi sıfırlar</li>
+                            <li>Geri al tuşu ile takvimdeki son değişikliği geri alabilirsiniz. Temizle butonu takvimi sıfırlar.</li>
                             <li>Listeyi excel formatında indirmek için "<a class="btn-floating tiny waves-effect waves-light green"><i class="material-icons">file_download</i></a>İndir" tuşuna basınız.</li>
                         </ul>
                     </div>
@@ -834,7 +847,7 @@
                     <input id="holidays" type="text" class="validate">
                     <label for="holidays">Resmi Tatil Günleri</label>
                 </div>
-                <div class="standalone-select-wrapper col s6" data-tooltip="Bir nöbetteki kişi sayısı" style="padding-top: 20px;">
+                <div class="standalone-select-wrapper col s6" data-tooltip="Bir nöbette bulunan kişi sayısı" style="padding-top: 20px;">
                     <div class="select-container">
                         <select id="dutyPerDay">
                             <option value="" disabled selected>Seçiniz</option>
@@ -900,7 +913,7 @@
                                         <i class="material-icons left">event</i>Nöbet Dağıt ve Takvim Oluştur
                                     </button>
                                     <button class="btn waves-effect waves-light grey darken-3" onclick="resetDuties()">
-                                        <i class="material-icons left">refresh</i>Sıfırla
+                                        <i class="material-icons left">refresh</i>Dağıtımı Sıfırla
                                     </button>
                                 </div>
                             </div>
@@ -940,7 +953,9 @@
                             <!-- Cumaları Dengele Checkbox -->
                             <div class="col s2" style="display: flex; align-items: center; justify-content: center;">
                                 <div class="switch-container">
-                                    <label>
+                                    <label class="tooltipped" 
+                                           data-position="bottom" 
+                                           data-tooltip="Cuma günlerini personele dengeli paylaştırmak için tikleyin.">
                                         <input type="checkbox" id="balanceFridays" />
                                         <span style="color: #000;">Cumaları Dengele</span>
                                     </label>
@@ -1422,6 +1437,58 @@
             M.toast({html: 'Nöbet dağıtımı ve takvim sıfırlandı!'});
         }
 
+
+        function showCustomAlert() {
+            // Mevcut uyarıyı kaldır
+            const existingAlert = document.querySelector('#calendarAlert');
+            if (existingAlert) existingAlert.remove();
+        
+            // Uyarı HTML'sini oluştur
+            const alertDiv = document.createElement('div');
+            alertDiv.id = 'calendarAlert';
+            alertDiv.className = 'card teal lighten-2';
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '10px';
+            alertDiv.style.left = '50%';
+            alertDiv.style.transform = 'translateX(-50%)';
+            alertDiv.style.width = '90%';
+            alertDiv.style.maxWidth = '400px';
+            alertDiv.style.zIndex = '10001'; // Footer ve diğer öğelerin üstünde
+            alertDiv.style.margin = '0';
+            alertDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+            alertDiv.innerHTML = `
+                <div class="card-content white-text center-align" style="padding: 12px;">
+                    <span style="font-weight: bold; font-size: 1rem; display: block; margin-bottom: 6px;">
+                        Takvim oluşturuldu ve nöbetler dengeli dağıtıldı!<br>
+                        Seçimlerinizi yaparak <span style="color: #e040fb;">‘Otomatik Ata’</span> tuşuna basınız.
+                    </span>
+                    <i class="material-icons" style="font-size: 20px; display: block; margin: 0 auto;">arrow_downward</i>
+                </div>
+            `;
+        
+            // Uyarıyı body'ye ekle
+            document.body.appendChild(alertDiv);
+        
+            // 3 saniye sonra kaldır
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) alertDiv.remove();
+                    }, 300);
+                }
+            }, 3000);
+        
+            // Mobil cihazlarda takvimi görünür yap
+            if (isMobileDevice()) {
+                setTimeout(() => {
+                    const calendarContainer = document.getElementById('calendarContainer');
+                    calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+            }
+        }
+
         function generateCalendar() {
             const startInput = document.getElementById('startDate').value;
             const endInput = document.getElementById('endDate').value;
@@ -1564,22 +1631,36 @@
             document.getElementById('calendarTable').innerHTML = html;
 
             const cells = document.querySelectorAll('.calendar-cell');
+            const isMobile = isMobileDevice();
+        
             cells.forEach(cell => {
-                cell.addEventListener('mousedown', startDragging);
-                cell.addEventListener('mousemove', dragOver);
-                cell.addEventListener('mouseup', stopDragging);
-                cell.addEventListener('touchstart', startDragging, { passive: false });
-                cell.addEventListener('touchmove', dragOver, { passive: false });
-                cell.addEventListener('touchend', stopDragging);
+                if (!isMobile) {
+                    cell.addEventListener('mousedown', startDragging);
+                    cell.addEventListener('mousemove', dragOver);
+                    cell.addEventListener('mouseup', stopDragging);
+                    cell.addEventListener('touchstart', startDragging, { passive: false });
+                    cell.addEventListener('touchmove', dragOver, { passive: false });
+                    cell.addEventListener('touchend', stopDragging);
+                }
+                
                 cell.addEventListener('click', () => {
                     const pIndex = parseInt(cell.dataset.pindex);
                     const dIndex = parseInt(cell.dataset.dindex);
                     handleCellClick(pIndex, dIndex);
                 });
+                
+                if (isMobile) {
+                    cell.addEventListener('touchend', (event) => {
+                        event.preventDefault();
+                        const pIndex = parseInt(cell.dataset.pindex);
+                        const dIndex = parseInt(cell.dataset.dindex);
+                        handleCellClick(pIndex, dIndex);
+                    }, { passive: false });
+                }
             });
-
+        
             if (collapsibleCalendar) collapsibleCalendar.open(0);
-            M.toast({html: 'Takvim oluşturuldu ve nöbetler dengeli dağıtıldı!'});
+            showCustomAlert(); // M.toast yerine yeni uyarı
             updateStatistics();
         }
 
@@ -2197,7 +2278,7 @@
 
             saveToHistory();
 
-            const CLOUD_FUNCTIONS_URL = 'https://deneme-174463354439.europe-west4.run.app';
+            const CLOUD_FUNCTIONS_URL = 'https://optimize-nobet-174463354439.us-central1.run.app';
 
             fetch(CLOUD_FUNCTIONS_URL, {
                 method: 'POST',
@@ -2361,7 +2442,7 @@
     
     <footer class="fixed-footer">
         <div class="footer-content">
-            © 2025 - M. Celil Aslan - CK
+            © 2025 - Dr. M. Celil Aslan - CK
         </div>
     </footer>
 
