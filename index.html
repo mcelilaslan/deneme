@@ -690,6 +690,7 @@
                             <li>Masaüstü tarayıcıda optimal çalışmaktadır.</li>
                             <li>Nöbet yazılacak tarih aralığını ve 1 nöbette bulunacak kişi sayısını girerek süreci başlatınız.</li>
                             <li><a class="btn-floating tiny waves-effect waves-light teal"><i class="material-icons">add</i></a> simgesine tıklayarak listeye personel ekleyebilirsiniz.</li>
+                            <li>Birlikte nöbet tutmak isteyen/ tutması gereken personeller var aynı gruba ekleyerek aynı güne nöbetçi atanmalarını sağlayabilirsiniz</li>
                             <li><a class="btn-floating tiny waves-effect waves-light grey"><i class="material-icons">more_vert</i></a>tuşu ile oluşturduğunuz personel listesini indirebilir, sonraki kullanımlarda yükleyerek süreci hızlandırabilirsiniz.</li>
                             <li><a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbet dağıtımını sisteme bırakabilir veya kendiniz planlayabilirsiniz.</li>
                             <li>Kişilere ayrı ayrı Hafta içi/sonu nöbet sayıları belirleyebilirsiniz.</li>
@@ -725,10 +726,22 @@
                   <input id="holidays" type="text" class="validate">
                   <label for="holidays">Resmi Tatil Günleri</label>
               </div>
-              <div class="input-field col s6 tooltipped" data-position="top" data-tooltip="Bir nöbetteki kişi sayısı">
-                  <input id="dutyPerDay" type="number" class="validate" min="1">
-                  <label for="dutyPerDay">Kaçar Kişi Nöbetçi?</label>
-              </div>
+             <div class="input-field col s6 tooltipped" data-position="top" data-tooltip="Bir nöbetteki kişi sayısı">
+                    <select id="dutyPerDay" class="validate">
+                        <option value="" disabled selected>Seçiniz</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                    <label for="dutyPerDay">Kaçar Kişi Nöbetçi?</label>
+                </div>
             </div>
         </div>
 
@@ -956,13 +969,16 @@
             });
             statsCollapsible = M.Collapsible.init(document.querySelector('#statsCollapsible'), { accordion: false });
             guideCollapsible = M.Collapsible.init(document.querySelector('#guideCollapsible'), { accordion: false });
-
+        
+            // Tüm select elementlerini Materialize ile başlat
             const selects = document.querySelectorAll('select');
-            selects.forEach(select => {
-                select.removeAttribute('data-m-select');
-                select.style.display = 'block';
+            M.FormSelect.init(selects, {
+                dropdownOptions: {
+                    coverTrigger: false,
+                    constrainWidth: false
+                }
             });
-
+        
             if (isMobileDevice()) {
                 document.querySelectorAll('.btn-floating').forEach(btn => {
                     btn.style.width = '36px';
@@ -1168,8 +1184,8 @@
                         <tr>
                             ${groupingEnabled ? '<th>Grup</th>' : ''}
                             <th>İsim</th>
-                            <th>Hafta İçi</th>
-                            <th>Hafta Sonu</th>
+                            <th>Hf İçi</th>
+                            <th>Hf Sonu</th>
                             <th class="duty-gap-header">
                                 2 Nöbet Arası Boşluk
                                 <a class="btn-floating btn-small waves-effect waves-light teal decrement-btn" onclick="decrementAllDutyGaps()">
