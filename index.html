@@ -576,55 +576,81 @@
                 margin-left: 5px;
         }
 
-        .custom-select-wrapper {
+        .standalone-select-wrapper {
             position: relative;
             width: 100%;
             max-width: 100%;
         }
         
-        .custom-select-wrapper select {
-            appearance: none; /* Varsayılan tarayıcı stilini kaldır */
+        .standalone-select-wrapper .select-container {
+            position: relative;
             width: 100%;
-            padding: 10px 15px;
-            font-size: 16px;
-            font-family: 'Bricolage Grotesque', sans-serif;
-            color: #374151;
-            background-color: #ffffff;
-            border: 2px solid #d1d5db;
-            border-radius: 8px;
-            height: 120px; /* 4 seçenek için yaklaşık yükseklik (30px/seçenek) */
-            overflow-y: auto; /* Kaydırma çubuğu */
-            cursor: pointer;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .custom-select-wrapper select:focus {
-            outline: none;
-            border-color: #26a69a;
-            box-shadow: 0 0 5px rgba(38, 166, 154, 0.5);
+        .standalone-select-wrapper .select-container select {
+            /* Materialize etkisini kaldırmak için */
+            appearance: none !important;
+            display: block !important;
+            width: 100% !important;
+            height: 120px !important; /* 4 seçenek için yükseklik */
+            padding: 10px 15px !important;
+            margin: 0 !important;
+            font-size: 16px !important;
+            font-family: 'Bricolage Grotesque', sans-serif !important;
+            color: #374151 !important;
+            background-color: #ffffff !important;
+            border: 2px solid #d1d5db !important;
+            border-radius: 8px !important;
+            overflow-y: auto !important; /* Kaydırma çubuğu */
+            cursor: pointer !important;
+            box-sizing: border-box !important;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
         }
         
-        .custom-select-wrapper select option {
-            padding: 8px 15px;
-            background-color: #ffffff;
-            color: #374151;
+        .standalone-select-wrapper .select-container select:focus {
+            outline: none !important;
+            border-color: #26a69a !important;
+            box-shadow: 0 0 5px rgba(38, 166, 154, 0.5) !important;
         }
         
-        .custom-select-wrapper select option:hover {
-            background-color: #f1f5f9;
+        .standalone-select-wrapper .select-container select option {
+            padding: 8px 15px !important;
+            background-color: #ffffff !important;
+            color: #374151 !important;
         }
         
-        .custom-select-wrapper label {
+        .standalone-select-wrapper .select-container select option:hover {
+            background-color: #f1f5f9 !important;
+        }
+        
+        .standalone-select-wrapper .select-container label {
+            position: absolute !important;
+            top: -10px !important;
+            left: 15px !important;
+            font-size: 12px !important;
+            color: #26a69a !important;
+            background-color: #ffffff !important;
+            padding: 0 5px !important;
+            font-family: 'Bricolage Grotesque', sans-serif !important;
+            pointer-events: none !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        /* Tooltip için Materialize'dan bağımsız stil */
+        .standalone-select-wrapper[data-tooltip]:hover:after {
+            content: attr(data-tooltip);
             position: absolute;
-            top: -10px;
-            left: 15px;
-            font-size: 12px;
-            color: #26a69a;
-            background-color: #ffffff;
-            padding: 0 5px;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
             font-family: 'Bricolage Grotesque', sans-serif;
-            pointer-events: none;
-            transition: all 0.3s ease;
+            white-space: nowrap;
+            z-index: 1000;
         }
 
 
@@ -729,12 +755,12 @@
               padding-left: 10px; /* Hafif bir girinti */
             }
 
-            .custom-select-wrapper {
+           .standalone-select-wrapper {
                 margin-bottom: 20px;
             }
-            .custom-select-wrapper select {
-                font-size: 14px;
-                height: 100px; /* Mobilde biraz daha küçük */
+            .standalone-select-wrapper .select-container select {
+                font-size: 14px !important;
+                height: 100px !important; /* Mobilde biraz daha küçük */
             }
         }
     </style>
@@ -787,21 +813,23 @@
                   <input id="holidays" type="text" class="validate">
                   <label for="holidays">Resmi Tatil Günleri</label>
               </div>
-            <div class="custom-select-wrapper col s6 tooltipped" data-position="top" data-tooltip="Bir nöbetteki kişi sayısı">
-                    <select id="dutyPerDay" size="4">
-                        <option value="" disabled selected>Seçiniz</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                        <option value="10">10</option>
-                    </select>
-                    <label for="dutyPerDay">Kaçar Kişi Nöbetçi?</label>
+            <div class="standalone-select-wrapper col s6" data-tooltip="Bir nöbetteki kişi sayısı">
+                    <div class="select-container">
+                        <select id="dutyPerDay" size="4">
+                            <option value="" disabled selected>Seçiniz</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                        <label for="dutyPerDay">Kaçar Kişi Nöbetçi?</label>
+                    </div>
                 </div>
             </div>
         </div>
