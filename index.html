@@ -276,22 +276,23 @@
             height: 30px !important;
             min-height: 30px !important;
             max-height: 30px !important;
-            overflow: hidden !important; 
+            overflow: visible !important; 
         }
     
         #personTable tbody td {
-            padding: 0 3px !important;
+            padding: 0 6px !important;
             height: 30px !important;
             vertical-align: middle !important;
             line-height: 30px !important;
             box-sizing: border-box !important;
-            overflow: hidden !important; 
+            overflow: visible !important; 
         }
     
         #personTable tbody td input[type="number"] {
             height: 20px !important;
             padding: 0 5px !important;
             line-height: 20px !important;
+            margin: 0 2px !important;
             font-size: 12px !important;
             margin: 0 !important;
             box-sizing: border-box !important;
@@ -678,18 +679,18 @@
         }
 
         .glow {
-            animation: glow 1s ease-in-out infinite;
+            animation: glow 4s ease-in-out infinite;
         }
         
         @keyframes glow {
             0% {
-                box-shadow: 0 0 5px #26a69a; /* Hafif bir parlama ile başlar */
+                box-shadow: 0 0 5px 5px #26a69a;
             }
             50% {
-                box-shadow: 0 0 20px #26a69a; /* Ortada maksimum parlama */
+                box-shadow: 0 0 20px 10px #26a69a; 
             }
             100% {
-                box-shadow: 0 0 5px #26a69a; /* Başlangıç seviyesine döner */
+                box-shadow: 0 0 5px 5px #26a69a; 
             }
         }
         
