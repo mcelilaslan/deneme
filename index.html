@@ -1194,6 +1194,13 @@
                     // Doğrulamayı tetikle
                     M.updateTextFields();
                     holidaysInput.dispatchEvent(new Event('input')); // Materialize’a içeriğin değiştiğini bildir
+                    if (selectedDays.length > 0 && holidaysInput.value.match(/^(\d{1,2}(,\d{1,2})*)?$/)) {
+                        holidaysInput.classList.remove('invalid');
+                        holidaysInput.classList.add('valid');
+                    } else {
+                        holidaysInput.classList.remove('valid');
+                        holidaysInput.classList.add('invalid');
+                    }
                 },
                 onClose: function() {
                     // Kapanırken son durumu input’a yaz
