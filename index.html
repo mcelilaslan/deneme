@@ -1176,7 +1176,7 @@
                         selectedDays.push(day);
                     }
             
-                    // Günleri sıralı şekilde güncelle
+                    // Günleri sıralı şekilde güncelle (boşluksuz)
                     selectedDays.sort((a, b) => a - b);
                     holidaysInput.value = selectedDays.join(',');
             
@@ -1194,6 +1194,7 @@
                     // Doğrulamayı tetikle
                     M.updateTextFields();
                     holidaysInput.dispatchEvent(new Event('input')); // Materialize’a içeriğin değiştiğini bildir
+                    // Manuel doğrulama kontrolü
                     if (selectedDays.length > 0 && holidaysInput.value.match(/^(\d{1,2}(,\d{1,2})*)?$/)) {
                         holidaysInput.classList.remove('invalid');
                         holidaysInput.classList.add('valid');
@@ -1203,10 +1204,18 @@
                     }
                 },
                 onClose: function() {
-                    // Kapanırken son durumu input’a yaz
-                    holidaysInput.value = selectedDays.join(', ');
+                    // Kapanırken son durumu input’a yaz (boşluksuz)
+                    holidaysInput.value = selectedDays.join(',');
                     M.updateTextFields();
                     holidaysInput.dispatchEvent(new Event('input')); // Materialize’a içeriğin değiştiğini bildir
+                    // Manuel doğrulama kontrolü
+                    if (selectedDays.length > 0 && holidaysInput.value.match(/^(\d{1,2}(,\d{1,2})*)?$/)) {
+                        holidaysInput.classList.remove('invalid');
+                        holidaysInput.classList.add('valid');
+                    } else {
+                        holidaysInput.classList.remove('valid');
+                        holidaysInput.classList.add('invalid');
+                    }
                 }
             });
             
@@ -1217,6 +1226,14 @@
                     background-color: #26a69a !important;
                     color: white !important;
                     border-radius: 50%;
+                }
+                input.validate.valid:not([type]), input.validate.valid[type="text"] {
+                    border-bottom: 1px solid #4caf50 !important;
+                    box-shadow: 0 1px 0 0 #4caf50 !important;
+                }
+                input.validate.invalid:not([type]), input.validate.invalid[type="text"] {
+                    border-bottom: 1px solid #f44336 !important;
+                    box-shadow: 0 1px 0 0 #f44336 !important;
                 }
             `;
             document.head.appendChild(style);
