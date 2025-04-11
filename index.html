@@ -562,19 +562,72 @@
                 display: flex;
                 align-items: center;
                 margin-left: 10px; /* Önceki konumda kullanılan stil, burada da geçerli */
-            }
+        }
         
-            .grouping-label {
+        .grouping-label {
                 display: flex;
                 align-items: center;
                 color: #374151;
                 white-space: nowrap;
-            }
+        }
         
-            .grouping-label span {
+        .grouping-label span {
                 font-size: 12px;
                 margin-left: 5px;
-            }
+        }
+
+        .custom-select-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .custom-select-wrapper select {
+            appearance: none; /* Varsayılan tarayıcı stilini kaldır */
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 16px;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            color: #374151;
+            background-color: #ffffff;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            height: 120px; /* 4 seçenek için yaklaşık yükseklik (30px/seçenek) */
+            overflow-y: auto; /* Kaydırma çubuğu */
+            cursor: pointer;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .custom-select-wrapper select:focus {
+            outline: none;
+            border-color: #26a69a;
+            box-shadow: 0 0 5px rgba(38, 166, 154, 0.5);
+        }
+        
+        .custom-select-wrapper select option {
+            padding: 8px 15px;
+            background-color: #ffffff;
+            color: #374151;
+        }
+        
+        .custom-select-wrapper select option:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .custom-select-wrapper label {
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            font-size: 12px;
+            color: #26a69a;
+            background-color: #ffffff;
+            padding: 0 5px;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+
 
         @media only screen and (max-width: 900px) {
             .custom-container {
@@ -675,6 +728,14 @@
               justify-content: flex-start; /* Sola hizalama */
               padding-left: 10px; /* Hafif bir girinti */
             }
+
+            .custom-select-wrapper {
+                margin-bottom: 20px;
+            }
+            .custom-select-wrapper select {
+                font-size: 14px;
+                height: 100px; /* Mobilde biraz daha küçük */
+            }
         }
     </style>
 </head>
@@ -726,8 +787,8 @@
                   <input id="holidays" type="text" class="validate">
                   <label for="holidays">Resmi Tatil Günleri</label>
               </div>
-             <div class="input-field col s6 tooltipped" data-position="top" data-tooltip="Bir nöbetteki kişi sayısı">
-                    <select id="dutyPerDay" class="validate">
+            <div class="custom-select-wrapper col s6 tooltipped" data-position="top" data-tooltip="Bir nöbetteki kişi sayısı">
+                    <select id="dutyPerDay" size="4">
                         <option value="" disabled selected>Seçiniz</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
