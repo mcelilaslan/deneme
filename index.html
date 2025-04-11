@@ -1944,7 +1944,7 @@ function autoAssignDuties() {
     weekendLeft: person.weekendDuties || 0,
     minDaysBetween: person.minDaysBetween,
     dutyDays: [],
-    originalIndex: persons.findIndex(p => p.name === person.name)
+    originalIndex: persons.findIndex(p => p.name === person.name), // Virgül eklendi
     group: person.group || 0
 }));
 
