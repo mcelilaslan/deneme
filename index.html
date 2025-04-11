@@ -868,7 +868,7 @@
             </div>
            <div class="row">
                 <div class="input-field col s6 tooltipped" data-position="top" data-tooltip="Resmi tatil günlerini seçerek, onları da haftasonu olarak sayabilirsiniz.">
-                    <input id="holidays" type="text" class="validate datepicker" readonly pattern="^(\d{1,2}(,\s*\d{1,2})*)?$">
+                    <input id="holidays" type="text" class="validate datepicker" readonly pattern="^(\d{1,2}(,\d{1,2})*)?$">
                     <label for="holidays">Ekstra Resmi Tatil Günü var mı</label>
                 </div>
                 <div class="standalone-select-wrapper col s6" data-tooltip="Bir nöbette bulunan kişi sayısı" style="padding-top: 20px;">
@@ -1178,7 +1178,7 @@
             
                     // Günleri sıralı şekilde güncelle
                     selectedDays.sort((a, b) => a - b);
-                    holidaysInput.value = selectedDays.join(', ');
+                    holidaysInput.value = selectedDays.join(',');
             
                     // Görsel geri bildirim için seçili günleri işaretle
                     const dayElements = this.el.parentElement.querySelectorAll('.datepicker-day-button');
