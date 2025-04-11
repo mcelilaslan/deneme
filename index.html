@@ -325,6 +325,24 @@
             padding: 5px !important; 
         }
 
+        .grouping-container {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+            height: 36px; /* Butonlarla aynı yükseklik */
+        }
+        
+        .grouping-label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .grouping-label span {
+            margin-left: 8px;
+        }
+
         #guideCollapsible {
             margin: 0;
         }
@@ -539,6 +557,10 @@
 
         .btn-floating {
             transition: 0.5s !important;
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            margin: 0 5px;
         }
 
         .btn-floating:hover {
@@ -639,6 +661,14 @@
                 width: 100%;
                 margin-bottom: 10px;
             }
+            .grouping-container {
+                margin-left: 5px;
+            }
+            .btn-floating {
+                width: 30px;
+                height: 30px;
+                line-height: 30px;
+            }
         }
     </style>
 </head>
@@ -719,11 +749,10 @@
                             </ul>
                             <input type="file" id="csvUpload" accept=".csv" style="display: none;" onchange="uploadPersonnel(event)">
                             <!-- Checkbox Eklenmesi -->
-                            <div class="switch" id="groupingSwitch" style="margin-left: 10px; display: none;">
-                                <label>
-                                    Gruplama yapılacak mı?
-                                    <input type="checkbox" id="groupingCheckbox" onchange="toggleGrouping()">
-                                    <span class="lever"></span>
+                            <div id="groupingSwitch" class="grouping-container" style="display: none;">
+                                <label class="grouping-label">
+                                    <input id="groupingCheckbox" type="checkbox" onchange="toggleGrouping()" />
+                                    <span>Gruplama yapılacak mı?</span>
                                 </label>
                             </div>
                         </div>
@@ -1115,102 +1144,76 @@
     }
 
     function renderTable() {
-    const tableContainer = document.getElementById('personnelTableContainer');
-    const noPersonnelMessage = document.getElementById('noPersonnelMessage');
-    const groupingSwitch = document.getElementById('groupingSwitch');
-    const groupingEnabled = document.getElementById('groupingCheckbox').checked;
-
-    // Personel sayısı 2 veya daha fazlaysa checkbox'ı göster
-    if (persons.length >= 2) {
-        groupingSwitch.style.display = 'block';
-    } else {
-        groupingSwitch.style.display = 'none';
-        document.getElementById('groupingCheckbox').checked = false; // Checkbox'ı sıfırla
-    }
-
-    if (persons.length === 0) {
-        tableContainer.style.display = 'none';
-        noPersonnelMessage.style.display = 'block';
-    } else {
-        tableContainer.style.display = 'table';
-        noPersonnelMessage.style.display = 'none';
-
-        let html = `
-            <thead>
-                <tr>
-                    ${groupingEnabled ? '<th>Grup</th>' : ''}
-                    <th>İsim</th>
-                    <th>Hafta İçi</th>
-                    <th>Hafta Sonu</th>
-                    <th class="duty-gap-header">
-                        2 Nöbet Arası Boşluk
-                        <a class="btn-floating btn-small waves-effect waves-light teal decrement-btn" onclick="decrementAllDutyGaps()">
-                            <i class="material-icons">arrow_downward</i>
-                        </a>
-                        <a class="btn-floating btn-small waves-effect waves-light teal increment-btn" onclick="incrementAllDutyGaps()">
-                            <i class="material-icons">arrow_upward</i>
-                        </a>
-                    </th>
-                    <th style="text-align: center;">Sil</th>
-                </tr>
-            </thead>
-            <tbody id="personTable">
-        `;
-
-        const groupCount = Math.ceil(persons.length / 2); // Grup sayısını dinamik hesapla
-
-        persons.forEach((person, index) => {
-            html += `
-                <tr style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; background-color: #f9fafb; transition: background-color 0.2s;">
-                    ${groupingEnabled ? `
-                        <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                            <select class="group-select" onchange="updateGroup(${index}, this.value)">
-                                <option value="0">Grup Seç</option>
-                                ${Array.from({ length: groupCount }, (_, i) => `<option value="${i + 1}" ${person.group === i + 1 ? 'selected' : ''}>Grup ${i + 1}</option>`).join('')}
-                            </select>
-                        </td>
-                    ` : ''}
-                    <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box; font-family: 'Arial', sans-serif; color: #374151;">
-                        ${person.name}
-                    </td>
-                    <!-- Geri kalan sütunlar aynı kalıyor -->
-                    <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                        <input type="number" class="planning-input" min="0" 
-                            value="${person.weekdayDuties === undefined ? '' : person.weekdayDuties}" 
-                            onchange="updateDuty(${index}, 'weekdayDuties', this.value)"
-                            style="height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 13px; margin: 0; padding: 0 6px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 4px; background-color: #ffffff; transition: border-color 0.2s; outline: none; overflow: hidden;">
-                    </td>
-                    <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                        <input type="number" class="planning-input" min="0" 
-                            value="${person.weekendDuties === undefined ? '' : person.weekendDuties}" 
-                            onchange="updateDuty(${index}, 'weekendDuties', this.value)"
-                            style="height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 13px; margin: 0; padding: 0 6px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 4px; background-color: #ffffff; transition: border-color 0.2s; outline: none; overflow: hidden;">
-                    </td>
-                    <td class="duty-gap-cell" style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                        <span style="margin-right: 8px; font-size: 13px; line-height: 24px; height: 24px; display: inline-block; color: #4b5563;">${person.minDaysBetween}</span>
-                        <a class="btn-floating btn-small waves-effect waves-light" onclick="decrementDutyGap(${index})"
-                           style="width: 24px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 12px; margin: 0 4px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #10b981; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s; overflow: hidden;">
-                            <i class="material-icons" style="line-height: 24px; font-size: 14px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; color: #ffffff;">arrow_downward</i>
-                        </a>
-                        <a class="btn-floating btn-small waves-effect waves-light" onclick="incrementDutyGap(${index})"
-                           style="width: 24px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 12px; margin: 0 4px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #10b981; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s; overflow: hidden;">
-                            <i class="material-icons" style="line-height: 24px; font-size: 14px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; color: #ffffff;">arrow_upward</i>
-                        </a>
-                    </td>
-                    <td class="left-align" style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                        <a class="btn-floating btn-small" onclick="deletePerson(${index})"
-                           style="width: 24px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 12px; margin: 0 4px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #ef4444; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s; overflow: hidden;">
-                            <i class="material-icons" style="line-height: 24px; font-size: 14px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; color: #ffffff;">delete</i>
-                        </a>
-                    </td>
-                </tr>
+        const tableContainer = document.getElementById('personnelTableContainer');
+        const noPersonnelMessage = document.getElementById('noPersonnelMessage');
+        const groupingSwitch = document.getElementById('groupingSwitch');
+        const groupingEnabled = document.getElementById('groupingCheckbox').checked;
+        const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value.trim()) || 0;
+    
+        if (dutyPerDay >= 2) {
+            groupingSwitch.style.display = 'block';
+        } else {
+            groupingSwitch.style.display = 'none';
+            document.getElementById('groupingCheckbox').checked = false;
+        }
+    
+        if (persons.length === 0) {
+            tableContainer.style.display = 'none';
+            noPersonnelMessage.style.display = 'block';
+        } else {
+            tableContainer.style.display = 'table';
+            noPersonnelMessage.style.display = 'none';
+    
+            let html = `
+                <thead>
+                    <tr>
+                        ${groupingEnabled ? '<th>Grup</th>' : ''}
+                        <th>İsim</th>
+                        <th>Hafta İçi</th>
+                        <th>Hafta Sonu</th>
+                        <th class="duty-gap-header">
+                            2 Nöbet Arası Boşluk
+                            <a class="btn-floating btn-small waves-effect waves-light teal decrement-btn" onclick="decrementAllDutyGaps()">
+                                <i class="material-icons">arrow_downward</i>
+                            </a>
+                            <a class="btn-floating btn-small waves-effect waves-light teal increment-btn" onclick="incrementAllDutyGaps()">
+                                <i class="material-icons">arrow_upward</i>
+                            </a>
+                        </th>
+                        <th style="text-align: center;">Sil</th>
+                    </tr>
+                </thead>
+                <tbody id="personTable">
             `;
-        });
-
-        html += `</tbody>`;
-        tableContainer.innerHTML = html;
+    
+            const groupCount = dutyPerDay >= 2 ? dutyPerDay : 0;
+    
+            persons.forEach((person, index) => {
+                html += `
+                    <tr style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; background-color: #f9fafb; transition: background-color 0.2s;">
+                        ${groupingEnabled && groupCount > 0 ? `
+                            <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
+                                <select class="group-select" onchange="updateGroup(${index}, this.value)">
+                                    <option value="0">Grup Seç</option>
+                                    ${Array.from({ length: groupCount }, (_, i) => `<option value="${i + 1}" ${person.group === i + 1 ? 'selected' : ''}>Grup ${i + 1}</option>`).join('')}
+                                </select>
+                            </td>
+                        ` : ''}
+                        <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box; font-family: 'Arial', sans-serif; color: #374151;">
+                            ${person.name}
+                        </td>
+                        <!-- Geri kalan sütunlar -->
+                    </tr>
+                `;
+            });
+    
+            html += `</tbody>`;
+            tableContainer.innerHTML = html;
+    
+            const selects = document.querySelectorAll('.group-select');
+            M.FormSelect.init(selects);
+        }
     }
-}
 
     function toggleGrouping() {
         renderTable();
