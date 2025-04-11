@@ -1347,7 +1347,7 @@
                         <tr>
                             ${groupingEnabled ? '<th>Grup</th>' : ''}
                             <th>İsim</th>
-                            <th>Hf İçi</th>
+                            <th>Hafta İçi</th>
                             <th>Hf Sonu</th>
                             <th class="duty-gap-header">
                                 2 Nöbet Arası Boşluk
@@ -1464,6 +1464,7 @@
 
        
                 
+               
         function showCustomAlert() {
             // Mevcut uyarıyı kaldır
             const existingAlert = document.querySelector('#calendarAlert');
@@ -1508,6 +1509,15 @@
             // Uyarıyı body'ye ekle
             document.body.appendChild(alertDiv);
         
+            // Bounce simgesine tıklama olayı ekle (sadece masaüstü)
+            const bounceButton = alertDiv.querySelector('.btn-floating.bounce');
+            if (!isMobileDevice()) {
+                bounceButton.addEventListener('click', () => {
+                    const calendarContainer = document.getElementById('calendarContainer');
+                    calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            }
+        
             // 3 saniye sonra kaldır
             setTimeout(() => {
                 if (alertDiv.parentNode) {
@@ -1517,9 +1527,9 @@
                         if (alertDiv.parentNode) alertDiv.remove();
                     }, 300);
                 }
-            }, 4000);
+            }, 3000);
         
-            // Mobil cihazlarda takvimi görünür yap
+            // Mobil cihazlarda otomatik takvim kaydırma (değişmedi)
             if (isMobileDevice()) {
                 setTimeout(() => {
                     const calendarContainer = document.getElementById('calendarContainer');
