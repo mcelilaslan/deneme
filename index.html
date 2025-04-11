@@ -1131,11 +1131,12 @@
             });
 
             const holidaysInput = document.getElementById('holidays');
+            let selectedDays = []; // Seçilen günleri tutacak dizi
+        
             const holidaysPicker = M.Datepicker.init(holidaysInput, {
                 format: 'dd-mm-yyyy',
                 autoClose: false, // Kullanıcı seçim yapana kadar kapanmasın
                 firstDay: 1,
-                selectMultiple: true, // Birden fazla gün seçilebilsin
                 i18n: {
                     months: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
                     monthsShort: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
@@ -1144,27 +1145,68 @@
                     weekdaysAbbrev: ['P', 'P', 'S', 'Ç', 'P', 'C', 'C']
                 },
                 onOpen: function() {
-                    // startDate’in ayına git
                     const startDatePicker = document.getElementById('startDate');
                     const startDateInstance = M.Datepicker.getInstance(startDatePicker);
                     if (startDateInstance && startDateInstance.date) {
                         this.setDate(startDateInstance.date);
                         this.gotoDate(startDateInstance.date);
                     }
+        
+                    // Önceki seçimleri işaretle
+                    setTimeout(() => {
+                        const dayElements = this.el.parentElement.querySelectorAll('.datepicker-day-button');
+                        dayElements.forEach(day => {
+                            const dayNum = parseInt(day.textContent);
+                            if (selectedDays.includes(dayNum)) {
+                                day.classList.add('selected-day'); // Özel stil ekle
+                            } else {
+                                day.classList.remove('selected-day');
+                            }
+                        });
+                    }, 0);
                 },
-                onSelect: function() {
-                    // Seçilen tarihlerden gün numaralarını al ve sıralı şekilde virgülle ayır
-                    const selectedDates = this._selectedDates || [];
-                    const days = selectedDates.map(date => date.getDate()).sort((a, b) => a - b);
-                    holidaysInput.value = days.join(', ');
+                onSelect: function(date) {
+                    const day = date.getDate();
+                    const index = selectedDays.indexOf(day);
+        
+                    // Gün zaten seçiliyse çıkar, değilse ekle
+                    if (index !== -1) {
+                        selectedDays.splice(index, 1);
+                    } else {
+                        selectedDays.push(day);
+                    }
+        
+                    // Günleri sıralı şekilde güncelle
+                    selectedDays.sort((a, b) => a - b);
+                    holidaysInput.value = selectedDays.join(', ');
+        
+                    // Görsel geri bildirim için seçili günleri işaretle
+                    const dayElements = this.el.parentElement.querySelectorAll('.datepicker-day-button');
+                    dayElements.forEach(dayEl => {
+                        const dayNum = parseInt(dayEl.textContent);
+                        if (selectedDays.includes(dayNum)) {
+                            dayEl.classList.add('selected-day');
+                        } else {
+                            dayEl.classList.remove('selected-day');
+                        }
+                    });
                 },
                 onClose: function() {
-                    // Seçim tamamlandığında input alanını güncelle
-                    const selectedDates = this._selectedDates || [];
-                    const days = selectedDates.map(date => date.getDate()).sort((a, b) => a - b);
-                    holidaysInput.value = days.join(', ');
+                    // Kapanırken son durumu input’a yaz
+                    holidaysInput.value = selectedDays.join(', ');
                 }
-            });            
+            });
+        
+            // Özel stil için CSS ekleme (seçili günlerin görünümünü değiştirmek için)
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .datepicker-day-button.selected-day {
+                    background-color: #26a69a !important;
+                    color: white !important;
+                    border-radius: 50%;
+                }
+            `;
+            document.head.appendChild(style);
 
             M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {
                 coverTrigger: false,
