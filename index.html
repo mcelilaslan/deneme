@@ -676,7 +676,24 @@
             margin: 0 !important;
             padding-left: 15px !important;
         }
-        @keyframes bounce {
+
+        .glow {
+            animation: glow 1s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px #26a69a; /* Hafif bir parlama ile başlar */
+            }
+            50% {
+                box-shadow: 0 0 20px #26a69a; /* Ortada maksimum parlama */
+            }
+            100% {
+                box-shadow: 0 0 5px #26a69a; /* Başlangıç seviyesine döner */
+            }
+        }
+        
+       @keyframes bounce {
         0%, 20%, 50%, 80%, 100% {
             transform: translateY(0);
         }
@@ -1646,6 +1663,19 @@
             }
         }
 
+        function addGlowEffect() {
+            // Personel tablosundaki tüm number tipi input alanlarını seç
+            const inputs = document.querySelectorAll('#personTable input[type="number"]');
+            inputs.forEach(input => {
+                // Glow efektini ekle
+                input.classList.add('glow');
+                // 2 saniye sonra efekti kaldır
+                setTimeout(() => {
+                    input.classList.remove('glow');
+                }, 4000);
+            });
+        }
+
 
         function generateCalendar() {
             const startInput = document.getElementById('startDate').value;
@@ -1818,7 +1848,8 @@
             });
         
             if (collapsibleCalendar) collapsibleCalendar.open(0);
-            showCustomAlert(); // M.toast yerine yeni uyarı
+            showCustomAlert();
+            addGlowEffect();
             updateStatistics();
         }
 
