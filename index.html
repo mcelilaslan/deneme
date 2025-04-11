@@ -2007,8 +2007,7 @@
 
             // Grup kontrolü için ek validation
             const groupingEnabled = document.getElementById('groupingCheckbox').checked;
-            const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value.trim()) || 0;
-            
+                        
             // Kontrol 1: Grup büyüklüğü ile dutyPerDay uyumsuzluğu
             if (groupingEnabled) {
                 const groupSizes = {};
