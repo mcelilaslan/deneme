@@ -729,7 +729,7 @@
                                <li><a class="tooltipped" onclick="downloadPersonnel()" data-position="right" data-tooltip="Hazırladığınız listeyi daha sonra kullanmak üzere csv formatında indirebilirsiniz">Personel Listesini İndir</a></li>
                             </ul>
                             <input type="file" id="csvUpload" accept=".csv" style="display: none;" onchange="uploadPersonnel(event)">
-                               <div id="groupingSwitch" class="grouping-container" style="display: none; margin-left: 5px;">
+                               <div id="groupingSwitch" class="grouping-container" style="display: none; margin-left: 8px;">
                                 <label class="grouping-label">
                                     <input id="groupingCheckbox" type="checkbox" onchange="toggleGrouping()" />
                                     <span>Birlikte nöbet tutması gerekenler var mı?</span>
@@ -1163,7 +1163,7 @@
                 console.log('Group Count:', groupCount);
 
                 persons.forEach((person, index) => {
-                    let groupOptions = '<option value="0">Grup Seç</option>';
+                    let groupOptions = '<option value="0">Seç</option>';
                     for (let i = 1; i <= groupCount; i++) {
                         groupOptions += `<option value="${i}" ${person.group === i ? 'selected' : ''}>${i}</option>`;
                     }
