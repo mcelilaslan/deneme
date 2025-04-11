@@ -1045,32 +1045,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            M.AutoInit();
-            collapsiblePersonel = M.Collapsible.init(document.querySelector('#personelCollapsible'), { accordion: false });
-            collapsibleCalendar = M.Collapsible.init(document.querySelector('#calendarCollapsible'), {
-                accordion: false,
-                onOpenStart: function() {
-                    document.getElementById('calendarContainer').classList.add('expanded');
-                },
-                onCloseEnd: function() {
-                    document.getElementById('calendarContainer').classList.remove('expanded');
-                }
-            });
-            statsCollapsible = M.Collapsible.init(document.querySelector('#statsCollapsible'), { accordion: false });
-            guideCollapsible = M.Collapsible.init(document.querySelector('#guideCollapsible'), { accordion: false });
-        
-                   
-            if (isMobileDevice()) {
-                document.querySelectorAll('.btn-floating').forEach(btn => {
-                    btn.style.width = '36px';
-                    btn.style.height = '36px';
-                    btn.style.lineHeight = '36px';
-                });
-                M.toast({ html: 'Yatay modda daha iyi bir deneyim elde edebilirsiniz!(Masaüstü kullanım önerilir)' });
-            }
-
-            const datepickers = document.querySelectorAll('.datepicker');
-            M.Datepicker.init(datepickers, {
+            // Materialize başlatma, ancak select hariç
+            const elems = document.querySelectorAll('.collapsible, .datepicker, .dropdown-trigger, .modal');
+            M.Collapsible.init(document.querySelectorAll('.collapsible'), { accordion: false });
+            M.Datepicker.init(document.querySelectorAll('.datepicker'), {
                 format: 'dd-mm-yyyy',
                 autoClose: true,
                 firstDay: 1,
@@ -1091,7 +1069,33 @@
                     }, 0);
                 }
             });
-
+            M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {
+                coverTrigger: false,
+                constrainWidth: false
+            });
+            M.Modal.init(document.querySelectorAll('.modal'));
+        
+            collapsiblePersonel = M.Collapsible.getInstance(document.querySelector('#personelCollapsible'));
+            collapsibleCalendar = M.Collapsible.getInstance(document.querySelector('#calendarCollapsible'));
+            statsCollapsible = M.Collapsible.getInstance(document.querySelector('#statsCollapsible'));
+            guideCollapsible = M.Collapsible.getInstance(document.querySelector('#guideCollapsible'));
+        
+            collapsibleCalendar.options.onOpenStart = function() {
+                document.getElementById('calendarContainer').classList.add('expanded');
+            };
+            collapsibleCalendar.options.onCloseEnd = function() {
+                document.getElementById('calendarContainer').classList.remove('expanded');
+            };
+        
+            if (isMobileDevice()) {
+                document.querySelectorAll('.btn-floating').forEach(btn => {
+                    btn.style.width = '36px';
+                    btn.style.height = '36px';
+                    btn.style.lineHeight = '36px';
+                });
+                M.toast({ html: 'Yatay modda daha iyi bir deneyim elde edebilirsiniz!(Masaüstü kullanım önerilir)' });
+            }
+        
             const startDatePicker = document.getElementById('startDate');
             const endDatePicker = document.getElementById('endDate');
             startDatePicker.addEventListener('change', function() {
@@ -1107,13 +1111,13 @@
                     collapsiblePersonel.open(0);
                 }
             });
-
+        
             endDatePicker.addEventListener('change', function() {
                 if (startDatePicker.value && endDatePicker.value && collapsiblePersonel) {
                     collapsiblePersonel.open(0);
                 }
             });
-
+        
             const personNameInput = document.getElementById('personName');
             if (personNameInput) {
                 personNameInput.addEventListener('keydown', function(event) {
@@ -1123,16 +1127,10 @@
                     }
                 });
             }
-
+        
             persons = [...defaultPersons];
             renderTable();
-
-            var dropdowns = document.querySelectorAll('.dropdown-trigger');
-            M.Dropdown.init(dropdowns, {
-                coverTrigger: false,
-                constrainWidth: false
-            });
-
+        
             const csvUploadInput = document.getElementById('csvUpload');
             if (csvUploadInput) {
                 csvUploadInput.removeEventListener('change', uploadPersonnel);
