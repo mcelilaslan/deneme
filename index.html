@@ -325,6 +325,21 @@
             padding: 5px !important; 
         }
 
+        #personnelTableContainer select {
+            display: block !important; /* Görünürlüğü zorla */
+            height: 24px;
+            font-size: 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 0 4px;
+            width: 60px;
+            background-color: #ffffff;
+            outline: none;
+            -webkit-appearance: menulist; /* Varsayılan dropdown görünümünü koru */
+            -moz-appearance: menulist;
+            appearance: menulist;
+        }
+
        .button-group {
             display: flex;
             align-items: center;
@@ -990,6 +1005,12 @@
         });
         statsCollapsible = M.Collapsible.init(document.querySelector('#statsCollapsible'), { accordion: false });
         guideCollapsible = M.Collapsible.init(document.querySelector('#guideCollapsible'), { accordion: false });
+
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.removeAttribute('data-m-select'); // Materialize'ın işaretlerini kaldır
+            select.style.display = 'block'; // Görünürlüğü zorla
+        });
     
        // Mobil cihaz kontrolü ve optimizasyon
     if (isMobileDevice()) {
@@ -1219,19 +1240,20 @@
         `;
 
         const groupCount = Math.ceil(persons.length / 2);
-        console.log('Group Count:', groupCount); // Hata ayıklamak için
+        console.log('Group Count:', groupCount);
 
         persons.forEach((person, index) => {
             let groupOptions = '<option value="0">Grup Seç</option>';
             for (let i = 1; i <= groupCount; i++) {
                 groupOptions += `<option value="${i}" ${person.group === i ? 'selected' : ''}>${i}</option>`;
             }
+            console.log('Group Options for', person.name, ':', groupOptions); // Seçenekleri kontrol et
 
             html += `
                 <tr style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; background-color: #f9fafb; transition: background-color 0.2s;">
                     ${groupingEnabled && groupCount > 0 ? `
                         <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                            <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px; width: 60px;" onchange="updateGroup(${index}, this.value)">
+                            <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px; width: 60px; display: block;" onchange="updateGroup(${index}, this.value)">
                                 ${groupOptions}
                             </select>
                         </td>
@@ -1274,7 +1296,17 @@
 
         html += `</tbody>`;
         tableContainer.innerHTML = html;
-    }
+
+        // Materialize'ın select'leri stilize etmesini engelle
+    const selects = tableContainer.querySelectorAll('select');
+    selects.forEach(select => {
+        select.style.display = 'block';
+        select.removeAttribute('data-m-select');
+        // Materialize'ın otomatik başlatmasını durdur
+        if (select.M_FormSelect) {
+            select.M_FormSelect.destroy();
+        }
+    });
 }
         
     function toggleGrouping() {
