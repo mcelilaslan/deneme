@@ -867,9 +867,9 @@
                 </div>
             </div>
            <div class="row">
-                <div class="input-field col s6 tooltipped" data-position="top" data-tooltip="Ay içinde resmi tatil varsa günleri buraya yazarak(virgülle ayırarak gün numaraları) haftasonu olarak sayabilirsiniz">
-                    <input id="holidays" type="text" class="validate">
-                    <label for="holidays">Resmi Tatil Günleri</label>
+                <div class="input-field col s6 tooltipped" data-position="top" data-tooltip="Resmi tatil günlerini seçerek, onları da haftasonu olarak sayabilirsiniz.">
+                    <input id="holidays" type="text" class="validate" readonly>
+                    <label for="holidays">Ekstra Resmi Tatil Günü var mı</label>
                 </div>
                 <div class="standalone-select-wrapper col s6" data-tooltip="Bir nöbette bulunan kişi sayısı" style="padding-top: 20px;">
                     <div class="select-container">
@@ -1129,6 +1129,43 @@
                     }, 0);
                 }
             });
+
+            const holidaysInput = document.getElementById('holidays');
+            const holidaysPicker = M.Datepicker.init(holidaysInput, {
+                format: 'dd-mm-yyyy',
+                autoClose: false, // Kullanıcı seçim yapana kadar kapanmasın
+                firstDay: 1,
+                selectMultiple: true, // Birden fazla gün seçilebilsin
+                i18n: {
+                    months: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                    monthsShort: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
+                    weekdays: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
+                    weekdaysShort: ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'],
+                    weekdaysAbbrev: ['P', 'P', 'S', 'Ç', 'P', 'C', 'C']
+                },
+                onOpen: function() {
+                    // startDate’in ayına git
+                    const startDatePicker = document.getElementById('startDate');
+                    const startDateInstance = M.Datepicker.getInstance(startDatePicker);
+                    if (startDateInstance && startDateInstance.date) {
+                        this.setDate(startDateInstance.date);
+                        this.gotoDate(startDateInstance.date);
+                    }
+                },
+                onSelect: function() {
+                    // Seçilen tarihlerden gün numaralarını al ve sıralı şekilde virgülle ayır
+                    const selectedDates = this._selectedDates || [];
+                    const days = selectedDates.map(date => date.getDate()).sort((a, b) => a - b);
+                    holidaysInput.value = days.join(', ');
+                },
+                onClose: function() {
+                    // Seçim tamamlandığında input alanını güncelle
+                    const selectedDates = this._selectedDates || [];
+                    const days = selectedDates.map(date => date.getDate()).sort((a, b) => a - b);
+                    holidaysInput.value = days.join(', ');
+                }
+            });            
+
             M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {
                 coverTrigger: false,
                 constrainWidth: false
@@ -1525,16 +1562,16 @@
                     alertDiv.style.transition = 'opacity 0.3s ease';
                     setTimeout(() => {
                         if (alertDiv.parentNode) alertDiv.remove();
-                    }, 300);
+                    }, 500);
                 }
-            }, 3000);
+            }, 5000);
         
             // Mobil cihazlarda otomatik takvim kaydırma (değişmedi)
             if (isMobileDevice()) {
                 setTimeout(() => {
                     const calendarContainer = document.getElementById('calendarContainer');
                     calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 300);
+                }, 500);
             }
         }
 
