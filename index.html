@@ -1195,6 +1195,11 @@
             return /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth <= 600;
         }
 
+        function showToast(message, duration = 4000) {
+            M.Toast.dismissAll(); // Eski toast'ları kaldır
+            M.toast({ html: message, displayLength: duration });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             
             const elems = document.querySelectorAll('.collapsible, .datepicker, .dropdown-trigger, .modal');
@@ -2590,7 +2595,7 @@
                     updateCalendar();
                     updateStatistics();
                     saveToHistory();
-                    M.toast({ html: 'Tüm nöbetler atandı!' });
+                    showToast('Tüm nöbetler atandı!', 4000); // Başarı mesajı, 4 saniye
                 } else {
                     let errorMessage = data.error || 'Bilinmeyen bir hata oluştu';
                     if (status === 400 && errorMessage.includes('Nöbet atamaları yapılamadı')) {
@@ -2598,12 +2603,12 @@
                     } else if (status === 400 && errorMessage.includes('Cuma veya Perşembe dengeleme başarısız')) {
                         errorMessage = 'Hata: Cuma veya Perşembe dengeleme başarısız, bu seçenekleri kapatıp tekrar deneyin!';
                     }
-                    M.toast({ html: errorMessage, displayLength: 8000 });
+                    showToast(errorMessage, 10000); // Hata mesajı, 10 saniye
                 }
             })
             .catch(error => {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                M.toast({ html: 'Sunucuyla bağlantı kurulamadı: ' + error.message, displayLength: 8000 });
+                showToast('Sunucuyla bağlantı kurulamadı: ' + error.message, 10000); // Hata mesajı, 10 saniye
             });
         }
 
