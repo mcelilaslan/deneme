@@ -469,46 +469,48 @@
         }
     
         .switch-container {
-            background-color: rgba(119,190,186,255) !important;
-            border: 1px solid #b0bec5;
-            padding: 8px 10px; /* Padding azaltıldı */
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            display: inline-flex;
-            align-items: center;
-            gap: 10px; /* Label’lar arası boşluk */
+           background-color: rgba(119,190,186,255) !important;
+           border: 1px solid #b0bec5;
+           padding: 6px 10px; /* Daha sıkı padding */
+           border-radius: 8px;
+           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+           display: flex;
+           flex-direction: column; /* Alt alta */
+           align-items: flex-start; /* Sola hizalı */
+           height: auto; /* İçeriğe göre yükseklik */
+           justify-content: center;
         }
 
-        .balance-label {
+        balance-label {
             display: flex;
             align-items: center;
-            margin: 0;
+            margin: 2px 0; /* Label’lar arası küçük boşluk */
         }
         
         .balance-label span {
-            font-size: 0.9rem; /* Metin küçültüldü */
+            font-size: 0.8rem; /* Font küçültüldü (~12.8px) */
             color: #000;
-            padding-left: 25px; /* Checkbox’tan metne mesafe (Materialize’e uyum) */
+            padding-left: 20px; /* Checkbox’tan metne mesafe */
         }
         
         .balance-checkbox + span:not(.lever)::before {
-            width: 16px; /* Checkbox’u biraz küçülttük */
-            height: 16px;
+            width: 14px; /* Checkbox küçültüldü */
+            height: 14px;
             border: 2px solid #5a5a5a;
             border-radius: 2px;
             background-color: #fff;
         }
         
         .balance-checkbox:checked + span:not(.lever)::before {
-            width: 10px;
-            height: 20px;
+            width: 8px;
+            height: 16px;
             border: none;
             border-right: 2px solid #26a69a;
             border-bottom: 2px solid #26a69a;
             background: transparent;
             transform: rotate(45deg);
-            margin-top: -4px;
-            margin-left: 4px;
+            margin-top: -3px;
+            margin-left: 3px;
         }
     
         .fixed-footer {
@@ -839,23 +841,23 @@
             }
 
             .switch-container {
-                padding: 6px 8px;
-                gap: 8px;
+                padding: 5px 8px;
+                width: 100%;
+                box-sizing: border-box;
             }
-            
             .balance-label span {
-                font-size: 0.85rem; 
-                padding-left: 20px; 
+                font-size: 0.75rem; /* Mobilde ~12px */
+                padding-left: 18px;
             }
-            
             .balance-checkbox + span:not(.lever)::before {
-                width: 14px;
-                height: 14px;
+                width: 12px;
+                height: 12px;
             }
-            
             .balance-checkbox:checked + span:not(.lever)::before {
-                width: 8px;
-                height: 18px;
+                width: 6px;
+                height: 14px;
+                margin-top: -3px;
+                margin-left: 2px;
             }
 
             #calendarAlert .card-content span {
