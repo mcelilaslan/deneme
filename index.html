@@ -1119,7 +1119,7 @@
             </ul>
         </div>
 
-        <!-- İstatistik Konteynırı -->
+       <!-- İstatistik Konteynırı -->
         <div class="custom-container">
             <ul class="collapsible popout" id="statsCollapsible">
                 <li>
@@ -1131,6 +1131,7 @@
                                     <th>Personel</th>
                                     <th>Hafta İçi</th>
                                     <th>Hafta Sonu</th>
+                                    <th>Perşembe</th>
                                     <th>Cuma</th>
                                     <th>Toplam</th>
                                 </tr>
@@ -2091,32 +2092,36 @@
             const startInput = document.getElementById('startDate').value;
             const endInput = document.getElementById('endDate').value;
             if (!startInput || !endInput) return;
-
+        
             const [startDay, startMonth, startYear] = startInput.split('-').map(Number);
             const [endDay, endMonth, endYear] = endInput.split('-').map(Number);
             const start = new Date(startYear, startMonth - 1, startDay);
             const end = new Date(endYear, endMonth - 1, endDay);
             start.setHours(0, 0, 0, 0);
             end.setHours(0, 0, 0, 0);
-
+        
             const holidayInput = document.getElementById('holidays').value;
             const holidays = holidayInput ? holidayInput.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d)) : [];
-
-            const stats = persons.map(p => ({name: p.name, weekday: 0, weekend: 0, friday: 0}));
+        
+            const stats = persons.map(p => ({name: p.name, weekday: 0, weekend: 0, thursday: 0, friday: 0}));
             const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-
+        
             for (let d = 0; d < days; d++) {
                 const date = new Date(start);
                 date.setDate(date.getDate() + d);
                 const isWeekend = date.getDay() === 0 || date.getDay() === 6 || holidays.includes(date.getDate());
+                const isThursday = date.getDay() === 4;
                 const isFriday = date.getDay() === 5;
-
+        
                 persons.forEach((person, pIndex) => {
                     if (selectedCells[`${pIndex}-${d}`]) {
                         if (isWeekend) {
                             stats[pIndex].weekend++;
                         } else {
                             stats[pIndex].weekday++;
+                            if (isThursday) {
+                                stats[pIndex].thursday++;
+                            }
                             if (isFriday) {
                                 stats[pIndex].friday++;
                             }
@@ -2124,17 +2129,18 @@
                     }
                 });
             }
-
+        
             const html = stats.map(stat => `
                 <tr>
                     <td>${stat.name}</td>
                     <td>${stat.weekday}</td>
                     <td>${stat.weekend}</td>
+                    <td>${stat.thursday}</td>
                     <td>${stat.friday}</td>
                     <td>${stat.weekday + stat.weekend}</td>
                 </tr>
             `).join('');
-
+        
             document.getElementById('statsTable').innerHTML = html;
             if (statsCollapsible) statsCollapsible.open(0);
         }
