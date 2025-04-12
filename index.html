@@ -471,11 +471,44 @@
         .switch-container {
             background-color: rgba(119,190,186,255) !important;
             border: 1px solid #b0bec5;
-            padding: 10px 15px;
+            padding: 8px 10px; /* Padding azaltıldı */
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             display: inline-flex;
             align-items: center;
+            gap: 10px; /* Label’lar arası boşluk */
+        }
+
+        .balance-label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+        }
+        
+        .balance-label span {
+            font-size: 0.9rem; /* Metin küçültüldü */
+            color: #000;
+            padding-left: 25px; /* Checkbox’tan metne mesafe (Materialize’e uyum) */
+        }
+        
+        .balance-checkbox + span:not(.lever)::before {
+            width: 16px; /* Checkbox’u biraz küçülttük */
+            height: 16px;
+            border: 2px solid #5a5a5a;
+            border-radius: 2px;
+            background-color: #fff;
+        }
+        
+        .balance-checkbox:checked + span:not(.lever)::before {
+            width: 10px;
+            height: 20px;
+            border: none;
+            border-right: 2px solid #26a69a;
+            border-bottom: 2px solid #26a69a;
+            background: transparent;
+            transform: rotate(45deg);
+            margin-top: -4px;
+            margin-left: 4px;
         }
     
         .fixed-footer {
@@ -805,6 +838,26 @@
                 margin-bottom: 10px;
             }
 
+            .switch-container {
+                padding: 6px 8px;
+                gap: 8px;
+            }
+            
+            .balance-label span {
+                font-size: 0.85rem; 
+                padding-left: 20px; 
+            }
+            
+            .balance-checkbox + span:not(.lever)::before {
+                width: 14px;
+                height: 14px;
+            }
+            
+            .balance-checkbox:checked + span:not(.lever)::before {
+                width: 8px;
+                height: 18px;
+            }
+
             #calendarAlert .card-content span {
                 font-size: 0.9rem !important;
                 line-height: 1.3;
@@ -859,7 +912,7 @@
                             <li>Kişilere ayrı ayrı hafta içi / hafta sonu nöbet sayıları belirleyebilirsiniz.</li>
                             <li>İki nöbet arası en az boşluk toplu veya kişiye özel olabilir.</li>
                             <li>Personel planı bittiğinde "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbet dağıt ve Takvim oluştur" tuşuna basınız.</li>
-                            <li>Cuma günlerini de dengelemek isterseniz ilgili kutucuğu tikleyiniz.</li>
+                            <li>Cuma ve Perşembe günlerini dengelemek isterseniz ilgili kutucukları tikleyiniz.</li>
                             <li>Varsa <font color="red">istenmeyen ✖</font>/<font color="green">istenen ✓</font> günleri takvim üzerinde işaretleyerek "<a class="btn-floating tiny waves-effect waves-light purple"><i class="material-icons">auto_fix_high</i></a>Otomatik Ata" tuşuna basınız.</li>
                             <li>Geri al tuşu ile takvimdeki son değişikliği geri alabilirsiniz. Temizle butonu takvimi sıfırlar.</li>
                             <li>Listeyi excel formatında indirmek için "<a class="btn-floating tiny waves-effect waves-light green"><i class="material-icons">file_download</i></a>İndir" tuşuna basınız.</li>
@@ -992,17 +1045,23 @@
                                 </div>
                             </div>
                             
-                            <!-- Cumaları Dengele Checkbox -->
+                            <!-- Perşembe Cumaları Dengele Checkbox -->
                             <div class="col s2" style="display: flex; align-items: center; justify-content: center;">
-                                <div class="switch-container">
-                                    <label class="tooltipped" 
-                                           data-position="bottom" 
-                                           data-tooltip="Cuma günlerini personele dengeli paylaştırmak için tikleyin.">
-                                        <input type="checkbox" id="balanceFridays" />
-                                        <span style="color: #000;">Cumaları Dengele</span>
-                                    </label>
+                                    <div class="switch-container">
+                                        <label class="tooltipped balance-label" 
+                                               data-position="bottom" 
+                                               data-tooltip="Cuma günlerini personele dengeli paylaştırmak için tikleyin.">
+                                            <input type="checkbox" id="balanceFridays" class="balance-checkbox" />
+                                            <span style="color: #000;">Cumaları Dengele</span>
+                                        </label>
+                                        <label class="tooltipped balance-label" 
+                                               data-position="bottom" 
+                                               data-tooltip="Perşembe günlerini personele dengeli paylaştırmak için tikleyin.">
+                                            <input type="checkbox" id="balanceThursdays" class="balance-checkbox" />
+                                            <span style="color: #000;">Perşembeleri Dengele</span>
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
                             
                             <!-- Otomatik Ata -->
                             <div class="col s2">
@@ -1591,25 +1650,26 @@
        
                 
                
-        function showCustomAlert() {
+       function showCustomAlert() {
             // Mevcut uyarıyı kaldır
             const existingAlert = document.querySelector('#calendarAlert');
             if (existingAlert) existingAlert.remove();
         
-            // Uyarı HTML'sini oluştur
             const alertDiv = document.createElement('div');
             alertDiv.id = 'calendarAlert';
-            alertDiv.className = 'card teal lighten-2';
+            alertDiv.className = 'card';
             alertDiv.style.position = 'fixed';
             alertDiv.style.width = '90%';
             alertDiv.style.maxWidth = '400px';
             alertDiv.style.zIndex = '10001';
             alertDiv.style.margin = '0';
-            alertDiv.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+            alertDiv.style.backgroundColor = '#f5e9d9'; 
+            alertDiv.style.border = '2px solid #26a69a'; 
+            alertDiv.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.3)'; 
+            alertDiv.style.borderRadius = '8px'; // 
         
-            // Masaüstü ve mobil için farklı konumlandırma
             if (isMobileDevice()) {
-                alertDiv.style.top = '10px';
+                alertDiv.style.top = '20px';
                 alertDiv.style.left = '50%';
                 alertDiv.style.transform = 'translateX(-50%)';
             } else {
@@ -1619,7 +1679,7 @@
             }
         
             alertDiv.innerHTML = `
-                <div class="card-content white-text center-align" style="padding: 12px;">
+                <div class="card-content center-align" style="padding: 12px; color: #000000;">
                     <span style="font-weight: bold; font-size: 1rem; display: block; margin-bottom: 8px;">
                         Takvim oluşturuldu ve nöbetler dengeli dağıtıldı!<br>
                         Dağıtımı kendiniz de değiştirebilirsiniz!<br>
@@ -1633,48 +1693,35 @@
                 </div>
             `;
         
-            // Uyarıyı body'ye ekle
             document.body.appendChild(alertDiv);
         
-            // Bounce simgesine tıklama olayı ekle (sadece masaüstü)
             const bounceButton = alertDiv.querySelector('.btn-floating.bounce');
-            if (!isMobileDevice()) {
-                bounceButton.addEventListener('click', () => {
-                    const calendarContainer = document.getElementById('calendarContainer');
-                    calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            }
+            bounceButton.addEventListener('click', () => {
+                const calendarContainer = document.getElementById('calendarContainer');
+                calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
         
-            // 3 saniye sonra kaldır
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.style.opacity = '0';
                     alertDiv.style.transition = 'opacity 0.3s ease';
                     setTimeout(() => {
                         if (alertDiv.parentNode) alertDiv.remove();
-                    }, 500);
+                    }, 800);
                 }
-            }, 5000);
-        
-            // Mobil cihazlarda otomatik takvim kaydırma (değişmedi)
-            if (isMobileDevice()) {
-                setTimeout(() => {
-                    const calendarContainer = document.getElementById('calendarContainer');
-                    calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 500);
-            }
+            }, 6000);
         }
 
         function addGlowEffect() {
-            // Personel tablosundaki tüm number tipi input alanlarını seç
+            
             const inputs = document.querySelectorAll('#personTable input[type="number"]');
             inputs.forEach(input => {
-                // Glow efektini ekle
+                
                 input.classList.add('glow');
-                // 2 saniye sonra efekti kaldır
+            
                 setTimeout(() => {
                     input.classList.remove('glow');
-                }, 4500);
+                }, 8000);
             });
         }
 
@@ -2305,7 +2352,8 @@
                 date.setDate(date.getDate() + i);
                 const isWeekend = date.getDay() === 0 || date.getDay() === 6 || holidays.includes(date.getDate());
                 const isFriday = date.getDay() === 5;
-                dates.push({ index: i, isWeekend, isFriday });
+                const isThursday = date.getDay() === 4;
+                dates.push({ index: i, isWeekend, isFriday, isThursday });
             }
 
             for (let d = 0; d < days; d++) {
@@ -2416,6 +2464,7 @@
             });
 
             const balanceFridays = document.getElementById('balanceFridays').checked;
+            const balanceThursdays = document.getElementById('balanceThursdays').checked;
 
             // Grup kontrolü için ek validation
             const groupingEnabled = document.getElementById('groupingCheckbox').checked;
@@ -2456,20 +2505,22 @@
             }
 
             const data = {
-                personnel: personnelDuties,
-                totalDays: days,
-                weekendDays: dates.map(d => d.isWeekend ? d.index : null).filter(d => d !== null),
-                fridayDays: dates.map(d => d.isFriday ? d.index : null).filter(d => d !== null),
-                unavailableCells: unavailableCells || {},
-                preAssignedDays: preAssignedDays,
-                maxConsecutiveDuties: 1,
-                dutyPerDay: dutyPerDay,
-                balanceFridays: balanceFridays
+               personnel: personnelDuties,
+               totalDays: days,
+               weekendDays: dates.map(d => d.isWeekend ? d.index : null).filter(d => d !== null),
+               fridayDays: dates.map(d => d.isFriday ? d.index : null).filter(d => d !== null),
+               thursdayDays: dates.map(d => d.isThursday ? d.index : null).filter(d => d !== null),
+               unavailableCells: unavailableCells || {},
+               preAssignedDays: preAssignedDays,
+               maxConsecutiveDuties: 1,
+               dutyPerDay: dutyPerDay,
+               balanceFridays: balanceFridays,
+               balanceThursdays: balanceThursdays
             };
 
             saveToHistory();
 
-            const CLOUD_FUNCTIONS_URL = 'https://optimize-nobet-174463354439.us-central1.run.app';
+            const CLOUD_FUNCTIONS_URL = 'https://deneme-174463354439.europe-west4.run.app';
 
             fetch(CLOUD_FUNCTIONS_URL, {
                 method: 'POST',
@@ -2496,8 +2547,8 @@
                     let errorMessage = data.error || 'Bilinmeyen bir hata oluştu';
                     if (status === 400 && errorMessage.includes('Nöbet atamaları yapılamadı')) {
                         errorMessage = 'Hata: Nöbet ertesi boşluk sayısını azaltmayı deneyin!';
-                    } else if (status === 400 && errorMessage.includes('Cuma günlerini dengeleme başarısız')) {
-                        errorMessage = 'Hata: Cuma günlerini dengeleme başarısız, bu seçeneği kapatıp tekrar deneyin!';
+                    } else if (status === 400 && errorMessage.includes('Cuma veya Perşembe dengeleme başarısız')) {
+                        errorMessage = 'Hata: Cuma veya Perşembe dengeleme başarısız, bu seçenekleri kapatıp tekrar deneyin!';
                     }
                     M.toast({ html: errorMessage, displayLength: 8000 });
                 }
