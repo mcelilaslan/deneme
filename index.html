@@ -175,6 +175,10 @@
             user-select: none; /* Seçimi engeller */
             -webkit-tap-highlight-color: transparent;
         }
+
+        #calendarAlert {
+            transition: opacity 0.3s ease;
+        }
     
         .name-column {
             min-width: 100px !important;
@@ -858,6 +862,14 @@
                 height: 14px;
                 margin-top: -3px;
                 margin-left: 2px;
+            }
+
+            #calendarAlert {
+                    max-width: 280px;
+            }
+            
+            #calendarAlert .card-content span {
+                    font-size: 0.9rem;
             }
 
             #calendarAlert .card-content span {
@@ -1657,32 +1669,42 @@
             const existingAlert = document.querySelector('#calendarAlert');
             if (existingAlert) existingAlert.remove();
         
+            // Yeni alert div'i oluştur
             const alertDiv = document.createElement('div');
             alertDiv.id = 'calendarAlert';
             alertDiv.className = 'card';
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.setAttribute('aria-live', 'assertive');
             alertDiv.style.position = 'fixed';
             alertDiv.style.width = '90%';
             alertDiv.style.maxWidth = '400px';
             alertDiv.style.zIndex = '10001';
-            alertDiv.style.margin = '0';
-            alertDiv.style.backgroundColor = '#f5e9d9'; 
-            alertDiv.style.border = '2px solid #26a69a'; 
-            alertDiv.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.3)'; 
-            alertDiv.style.borderRadius = '8px'; // 
+            alertDiv.style.backgroundColor = 'rgba(245, 233, 217, 0.9)'; // Yarı saydam krem tonu
+            alertDiv.style.backdropFilter = 'blur(8px)'; // Blurlu arka plan
+            alertDiv.style.webkitBackdropFilter = 'blur(8px)'; // Safari desteği
+            alertDiv.style.border = '2px solid #26a69a';
+            alertDiv.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.3)';
+            alertDiv.style.borderRadius = '8px';
         
+            // Mobil ve masaüstü için konumlandırma
             if (isMobileDevice()) {
                 alertDiv.style.top = '20px';
                 alertDiv.style.left = '50%';
                 alertDiv.style.transform = 'translateX(-50%)';
+                if (window.innerWidth < 360) {
+                    alertDiv.style.maxWidth = '280px';
+                }
             } else {
                 alertDiv.style.top = '50%';
                 alertDiv.style.left = '50%';
                 alertDiv.style.transform = 'translate(-50%, -50%)';
             }
         
+            // Alert içeriği
             alertDiv.innerHTML = `
                 <div class="card-content center-align" style="padding: 12px; color: #000000;">
-                    <span style="font-weight: bold; font-size: 1rem; display: block; margin-bottom: 8px;">
+                    <span style="font-weight: bold; font-size: 1rem; display: block; margin-bottom: 8px;" 
+                          aria-label="Takvim oluşturuldu. Nöbetler dengeli dağıtıldı. Dağıtımı değiştirebilir veya takvimde seçim yaparak Otomatik Ata butonuna basabilirsiniz.">
                         Takvim oluşturuldu ve nöbetler dengeli dağıtıldı!<br>
                         Dağıtımı kendiniz de değiştirebilirsiniz!<br>
                         Takvimde seçimlerinizi yaparak <span style="color: #e040fb;">‘Otomatik Ata’</span> tuşuna basınız.
@@ -1695,15 +1717,12 @@
                 </div>
             `;
         
+            // Alert'i sayfaya ekle
             document.body.appendChild(alertDiv);
         
+            // Bouncing buton etkileşimi
             const bounceButton = alertDiv.querySelector('.btn-floating.bounce');
-            bounceButton.addEventListener('click', () => {
-                const calendarContainer = document.getElementById('calendarContainer');
-                calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        
-            setTimeout(() => {
+            let timeoutId = setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.style.opacity = '0';
                     alertDiv.style.transition = 'opacity 0.3s ease';
@@ -1712,6 +1731,33 @@
                     }, 800);
                 }
             }, 6000);
+        
+            bounceButton.addEventListener('click', () => {
+                clearTimeout(timeoutId);
+                bounceButton.classList.remove('bounce'); // Animasyonu durdur
+                const calendarContainer = document.getElementById('calendarContainer');
+                calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                alertDiv.remove();
+            });
+        
+            // Kutucuk dışında tıklama ile kapatma
+            const closeOnOutsideClick = (event) => {
+                if (!alertDiv.contains(event.target)) {
+                    clearTimeout(timeoutId);
+                    bounceButton.classList.remove('bounce'); // Animasyonu durdur
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) alertDiv.remove();
+                    }, 800);
+                    document.removeEventListener('click', closeOnOutsideClick);
+                }
+            };
+        
+            // İlk tıklamayı yakalamak için kısa bir gecikme (alert’in yerleşmesi için)
+            setTimeout(() => {
+                document.addEventListener('click', closeOnOutsideClick);
+            }, 100);
         }
 
         function addGlowEffect() {
