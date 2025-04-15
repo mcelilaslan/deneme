@@ -1543,7 +1543,7 @@
             availabilityMode = !switchInput.checked;
         }
 
-     function renderTable() {
+    function renderTable() {
             const tableContainer = document.getElementById('personnelTableContainer');
             const noPersonnelMessage = document.getElementById('noPersonnelMessage');
             const groupingSwitch = document.getElementById('groupingSwitch');
@@ -1622,19 +1622,19 @@
                             <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px; font-family: 'Arial', sans-serif; color: #374151; font-size: ${isMobile ? '12px' : '14px'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="${person.name}">
                                 ${displayName}
                             </td>
-                            <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '4px' : '8px'};">
+                            <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '2px' : '8px'};">
                                 <input type="number" class="planning-input" min="0" 
                                     value="${person.weekdayDuties === undefined ? '' : person.weekdayDuties}" 
                                     onchange="updateDuty(${index}, 'weekdayDuties', this.value)"
-                                    style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background-color: #ffffff; color: #374151; width: ${isMobile ? '60px' : '80px'}; transition: border-color 0.3s; outline: none;">
+                                    style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background-color: #ffffff; color: #374151; width: ${isMobile ? '50px' : '80px'}; transition: border-color 0.3s; outline: none;">
                             </td>
-                            <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '4px' : '8px'};">
+                            <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '2px' : '8px'};">
                                 <input type="number" class="planning-input" min="0" 
                                     value="${person.weekendDuties === undefined ? '' : person.weekendDuties}" 
                                     onchange="updateDuty(${index}, 'weekendDuties', this.value)"
-                                    style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background-color: #ffffff; color: #374151; width: ${isMobile ? '60px' : '80px'}; transition: border-color 0.3s; outline: none;">
+                                    style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background-color: #ffffff; color: #374151; width: ${isMobile ? '50px' : '80px'}; transition: border-color 0.3s; outline: none;">
                             </td>
-                            <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px; text-align: center;">
+                            <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '12px' : '8px'}; text-align: center;">
                                 <span style="margin-right: 8px; font-size: ${isMobile ? '12px' : '14px'}; color: #4b5563;">${person.minDaysBetween}</span>
                                 <a class="btn-floating btn-small waves-effect waves-light teal" onclick="decrementDutyGap(${index})"
                                    style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
