@@ -1543,7 +1543,7 @@
             availabilityMode = !switchInput.checked;
         }
 
-      function renderTable() {
+     function renderTable() {
             const tableContainer = document.getElementById('personnelTableContainer');
             const noPersonnelMessage = document.getElementById('noPersonnelMessage');
             const groupingSwitch = document.getElementById('groupingSwitch');
@@ -1637,18 +1637,18 @@
                             <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px; text-align: center;">
                                 <span style="margin-right: 8px; font-size: ${isMobile ? '12px' : '14px'}; color: #4b5563;">${person.minDaysBetween}</span>
                                 <a class="btn-floating btn-small waves-effect waves-light teal" onclick="decrementDutyGap(${index})"
-                                   style="${isMobile ? 'width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
-                                    <i class="material-icons" style="${isMobile ? 'font-size: 10px; line-height: 10px;' : ''}">arrow_downward</i>
+                                   style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
+                                    <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">arrow_downward</i>
                                 </a>
                                 <a class="btn-floating btn-small waves-effect waves-light teal" onclick="incrementDutyGap(${index})"
-                                   style="${isMobile ? 'width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
-                                    <i class="material-icons" style="${isMobile ? 'font-size: 10px; line-height: 10px;' : ''}">arrow_upward</i>
+                                   style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
+                                    <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">arrow_upward</i>
                                 </a>
                             </td>
                             <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px; text-align: center;">
                                 <a class="btn-floating btn-small waves-effect waves-light red" onclick="deletePerson(${index})"
-                                   style="${isMobile ? 'width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
-                                    <i class="material-icons" style="${isMobile ? 'font-size: 10px; line-height: 10px;' : ''}">delete</i>
+                                   style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
+                                    <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">delete</i>
                                 </a>
                             </td>
                         </tr>
