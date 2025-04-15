@@ -1634,8 +1634,8 @@
                                     onchange="updateDuty(${index}, 'weekendDuties', this.value)"
                                     style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background-color: #ffffff; color: #374151; width: ${isMobile ? '50px' : '80px'}; transition: border-color 0.3s; outline: none;">
                             </td>
-                            <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '12px' : '8px'}; text-align: center;">
-                                <span style="margin-right: 8px; font-size: ${isMobile ? '12px' : '14px'}; color: #4b5563;">${person.minDaysBetween}</span>
+                            <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '12px' : '8px'}; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; white-space: nowrap;">
+                                <span style="margin-right: ${isMobile ? '4px' : '8px'}; font-size: ${isMobile ? '12px' : '14px'}; color: #4b5563;">${person.minDaysBetween}</span>
                                 <a class="btn-floating btn-small waves-effect waves-light teal" onclick="decrementDutyGap(${index})"
                                    style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
                                     <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">arrow_downward</i>
