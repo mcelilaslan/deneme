@@ -1020,18 +1020,19 @@
                                 </div>
                             </div>
                             <!-- Grup Checkbox-->
-                            <div id="groupingSwitchContainer" style="margin-bottom: 15px; display: none;"> <div class="grouping-container" id="groupingSwitch">
-                                <label class="grouping-label tooltipped" data-position="top" data-tooltip="Birlikte nöbetçi olması gereken kişileri sol taraftan aynı (+) gruba eklemeniz yeterli">
+                            <div id="groupingSwitch" class="grouping-container" style="margin-bottom: 15px;">
+                                <label class="grouping-label tooltipped" data-position="top" data-tooltip="Birlikte nöbetçi olması gereken kişileri sol taraftan aynı gruba eklemeniz yeterli">
                                     <input id="groupingCheckbox" type="checkbox" onchange="toggleGrouping()" />
-                                    <span>Birlikte nöbet tutması gerekenler var mı? (+ Grup)</span>
+                                    <span>Birlikte nöbet tutması gerekenler var mı?</span>
                                 </label>
                             </div>
-                            <div class="grouping-container" id="notTogetherSwitch" style="margin-top: 10px;"> <label class="grouping-label tooltipped" data-position="top" data-tooltip="Aynı gün nöbetçi olmaması gereken kişileri sol taraftan aynı (-) gruba eklemeniz yeterli">
-                                    <input id="notTogetherCheckbox" type="checkbox" onchange="toggleNotTogetherGrouping()" />
-                                    <span>Aynı nöbette bulunmaması gereken var mı? (- Grup)</span>
+                            <!-- Not Together Checkbox -->
+                            <div id="notTogetherSwitch" class="grouping-container" style="margin-bottom: 15px;">
+                                <label class="grouping-label tooltipped" data-position="top" data-tooltip="Aynı gün nöbet tutmaması gereken kişileri gruplayın">
+                                    <input id="notTogetherCheckbox" type="checkbox" onchange="toggleNotTogether()" />
+                                    <span>Aynı nöbette bulunmaması gereken var mı?</span>
                                 </label>
                             </div>
-                        </div>
                             <!-- "No Personel" -->
                             <div id="noPersonnelMessage" class="no-personnel-message" style="display: block;">
                                 Henüz Personel Eklenmedi
@@ -1151,15 +1152,12 @@
                         <table class="striped">
                             <thead>
                                 <tr>
-                                    <th id="notTogetherHeader" style="display: none;" class="tooltipped" data-position="top" data-tooltip="Aynı gün nöbet tutmaması gerekenleri gruplayın"> - Grup </th>
-                                    <th id="groupHeader" style="display: none;" class="tooltipped" data-position="top" data-tooltip="Aynı nöbette bulunmak isteyenleri gruplayın"> + Grup </th>
-                                    <th>İsim</th>
+                                    <th>Personel</th>
                                     <th>Hafta İçi</th>
-                                    <th>Hf Sonu</th>
-                                    <th class="duty-gap-header">
-                                        2 Nöbet Arası Boşluk
-                                        </th>
-                                    <th style="text-align: center;">Sil</th>
+                                    <th>Hafta Sonu</th>
+                                    <th>Perşembe</th>
+                                    <th>Cuma</th>
+                                    <th>Toplam</th>
                                 </tr>
                             </thead>
                             <tbody id="statsTable"></tbody>
@@ -1215,7 +1213,7 @@
         let isDragging = false;
         let dragStart = null;
         let isUploading = false;
-        
+        let notTogetherEnabled = false;
 
         const defaultPersons = [];
 
@@ -1445,33 +1443,15 @@
             M.Tooltip.init(document.querySelectorAll('.tooltipped'));
         });
 
-       document.getElementById('dutyPerDay').addEventListener('change', function() {
+        document.getElementById('dutyPerDay').addEventListener('change', function() {
             const dutyPerDay = parseInt(this.value) || 0;
-            const groupingContainer = document.getElementById('groupingSwitchContainer'); // Ana konteyner
-            const groupingCheckbox = document.getElementById('groupingCheckbox');
-            const notTogetherCheckbox = document.getElementById('notTogetherCheckbox');
-        
+            const groupingSwitch = document.getElementById('groupingSwitch');
             if (dutyPerDay >= 2) {
-                groupingContainer.style.display = 'block'; // Konteyneri göster
+                groupingSwitch.style.display = 'block';
             } else {
-                groupingContainer.style.display = 'none'; // Konteyneri gizle
-                // Gruplama aktif değilse, checkbox'ları ve state'leri sıfırla
-                if (groupingCheckbox.checked) {
-                    groupingCheckbox.checked = false;
-                    toggleGrouping(); // renderTable'ı tetikler
-                }
-                if (notTogetherCheckbox.checked) {
-                     notTogetherCheckbox.checked = false;
-                     toggleNotTogetherGrouping(); // renderTable'ı tetikler
-                }
-                // State'leri de manuel sıfırlayalım (toggle fonksiyonları zaten yapıyor ama garanti olsun)
-                groupingEnabled = false;
-                notTogetherGroupingEnabled = false;
-                // Eğer toggle fonksiyonları renderTable çağırmıyorsa, burada çağırın:
-                // renderTable();
+                groupingSwitch.style.display = 'none';
+                document.getElementById('groupingCheckbox').checked = false;
             }
-            // Eğer sadece dutyPerDay değiştiyse ve 2'den küçük değilse renderTable çağırmaya gerek yok,
-            // çünkü checkbox'lar değişince zaten çağrılıyor.
         });
 
 
@@ -1518,26 +1498,27 @@
             document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
         }
 
-        let notTogetherGroupingEnabled = false;
-        
         function addPerson() {
-            const name = document.getElementById('personName').value.trim().toUpperCase();
-            if (!name) return M.toast({html: 'Lütfen isim girin!'});
-            if (persons.some(p => p.name === name)) return M.toast({html: 'Bu isim zaten var!'});
-            persons.push({
-                name: name,
-                weekdayDuties: undefined,
-                weekendDuties: undefined,
-                minDaysBetween: 1,
-                group: 0,
-                notTogetherGroup: 0 // Yeni özellik eklendi
+            const nameInput = document.getElementById('personName');
+            const name = nameInput.value.trim().toUpperCase();
+            if (!name) {
+                M.toast({ html: 'Lütfen bir isim girin!' });
+                return;
+            }
+            if (persons.some(p => p.name === name)) {
+                M.toast({ html: 'Bu isim zaten eklenmiş!' });
+                return;
+            }
+            persons.push({ 
+                name, 
+                minDaysBetween: 1, 
+                group: 0, 
+                notTogether: 0 
             });
-            document.getElementById('personName').value = '';
+            nameInput.value = '';
             renderTable();
-            if (collapsiblePersonel) collapsiblePersonel.open(0);
-            M.toast({html: `${name} eklendi!`});
+            M.updateTextFields();
         }
-
         function deletePerson(index) {
             const name = persons[index].name;
             persons.splice(index, 1);
@@ -1572,178 +1553,128 @@
             availabilityMode = !switchInput.checked;
         }
 
-        function renderTable() {
+       function renderTable() {
             const tableContainer = document.getElementById('personnelTableContainer');
-            // thead ve tbody'yi ayrı ayrı hedefleyelim
-            let thead = tableContainer.querySelector('thead');
-            let personTableBody = tableContainer.querySelector('tbody'); // tbody'yi hedef alalım
             const noPersonnelMessage = document.getElementById('noPersonnelMessage');
-        
-            // Gruplama state'lerini checkbox'ların güncel durumundan alalım
-            // Bu değişkenlerin global scope'ta veya renderTable çağrılmadan önce
-            // güncellendiğinden emin olun (toggleGrouping ve toggleNotTogetherGrouping içinde)
             const groupingEnabled = document.getElementById('groupingCheckbox').checked;
-            const notTogetherGroupingEnabled = document.getElementById('notTogetherCheckbox').checked;
-        
-            // thead veya tbody yoksa oluşturalım
-            if (!thead) {
-                thead = document.createElement('thead');
-                // tbody'den önce thead'i eklemek daha standarttır
-                if (personTableBody) {
-                    tableContainer.insertBefore(thead, personTableBody);
-                } else {
-                     tableContainer.appendChild(thead); // tbody yoksa sona ekle
-                }
-            }
-             if (!personTableBody) {
-                personTableBody = document.createElement('tbody');
-                personTableBody.id = 'personTable'; // ID'sini koru
-                tableContainer.appendChild(personTableBody); // Sona ekle
-            }
-        
+            const notTogetherEnabled = document.getElementById('notTogetherCheckbox').checked;
         
             if (persons.length === 0) {
-                // Personel yoksa tabloyu gizle, mesajı göster
-                tableContainer.style.display = 'none';
                 noPersonnelMessage.style.display = 'block';
-                // Başlıkları ve tbody içeriğini temizle
-                thead.innerHTML = '';
-                personTableBody.innerHTML = '';
+                tableContainer.style.display = 'none';
+                return;
             } else {
-                // Personel varsa tabloyu göster, mesajı gizle
-                tableContainer.style.display = 'table';
                 noPersonnelMessage.style.display = 'none';
+                tableContainer.style.display = 'block';
+            }
         
-                // Başlıkları (thead) oluştur/güncelle
-                let headerHtml = `
+            let html = `
+                <thead>
                     <tr>
-                        <th style="${notTogetherGroupingEnabled ? '' : 'display: none;'}" class="tooltipped" data-position="top" data-tooltip="Aynı gün nöbet tutmaması gerekenleri gruplayın (- Grup)"> - Grup </th>
-                        <th style="${groupingEnabled ? '' : 'display: none;'}" class="tooltipped" data-position="top" data-tooltip="Aynı nöbette bulunmak isteyenleri gruplayın (+ Grup)"> + Grup </th>
-                        <th>İsim</th>
-                        <th>Hafta İçi</th>
-                        <th>Hf Sonu</th>
-                        <th class="duty-gap-header">
-                            2 Nöbet Arası Boşluk
-                            <a class="btn-floating btn-small waves-effect waves-light teal decrement-btn" onclick="decrementAllDutyGaps()">
-                                 <i class="material-icons">arrow_downward</i>
+                        ${groupingEnabled ? '<th style="width: 70px; min-width: 70px; max-width: 70px; overflow: hidden; text-align: center;" class="tooltipped" data-position="top" data-tooltip="Birlikte nöbet tutması gerekenleri gruplayın">+Grup</th>' : ''}
+                        ${notTogetherEnabled ? '<th style="width: 70px; min-width: 70px; max-width: 70px; overflow: hidden; text-align: center;" class="tooltipped" data-position="top" data-tooltip="Aynı gün nöbet tutmaması gerekenleri gruplayın">-Grup</th>' : ''}
+                        <th style="width: 120px; min-width: 120px; max-width: 200px; overflow: hidden; text-align: left;">İsim</th>
+                        <th style="width: 100px; min-width: 100px; max-width: 100px; overflow: hidden; text-align: center;">Hafta İçi</th>
+                        <th style="width: 100px; min-width: 100px; max-width: 100px; overflow: hidden; text-align: center;">Hafta Sonu</th>
+                        <th style="width: 120px; min-width: 120px; max-width: 120px; overflow: hidden; text-align: center;">Nöbet Ertesi Boşluk</th>
+                        <th style="width: 50px; min-width: 50px; max-width: 50px; overflow: hidden; text-align: center;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+        
+            persons.forEach((person, index) => {
+                html += `
+                    <tr style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden;">
+                        ${groupingEnabled ? `
+                            <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
+                                <select class="browser-default" onchange="updateGroup(${index}, this.value)" style="height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 13px; margin: 0; padding: 0 6px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 4px; background-color: #ffffff; transition: border-color 0.2s; outline: none; overflow: hidden;">
+                                    <option value="0" ${person.group === 0 ? 'selected' : ''}>Yok</option>
+                                    <option value="1" ${person.group === 1 ? 'selected' : ''}>1</option>
+                                    <option value="2" ${person.group === 2 ? 'selected' : ''}>2</option>
+                                    <option value="3" ${person.group === 3 ? 'selected' : ''}>3</option>
+                                    <option value="4" ${person.group === 4 ? 'selected' : ''}>4</option>
+                                    <option value="5" ${person.group === 5 ? 'selected' : ''}>5</option>
+                                </select>
+                            </td>
+                        ` : ''}
+                        ${notTogetherEnabled ? `
+                            <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
+                                <select class="browser-default" onchange="updateNotTogether(${index}, this.value)" style="height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 13px; margin: 0; padding: 0 6px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 4px; background-color: #ffffff; transition: border-color 0.2s; outline: none; overflow: hidden;">
+                                    <option value="0" ${person.notTogether === 0 ? 'selected' : ''}>Yok</option>
+                                    <option value="1" ${person.notTogether === 1 ? 'selected' : ''}>1</option>
+                                    <option value="2" ${person.notTogether === 2 ? 'selected' : ''}>2</option>
+                                    <option value="3" ${person.notTogether === 3 ? 'selected' : ''}>3</option>
+                                    <option value="4" ${person.notTogether === 4 ? 'selected' : ''}>4</option>
+                                    <option value="5" ${person.notTogether === 5 ? 'selected' : ''}>5</option>
+                                </select>
+                            </td>
+                        ` : ''}
+                        <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box; font-size: 13px; font-weight: 500; color: #374151; text-align: left; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                            ${person.name}
+                        </td>
+                        <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
+                            <input type="number" class="planning-input" min="0" 
+                                value="${person.weekdayDuties === undefined ? '' : person.weekdayDuties}" 
+                                onchange="updateDuty(${index}, 'weekdayDuties', this.value)"
+                                style="height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 13px; margin: 0; padding: 0 6px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 4px; background-color: #ffffff; transition: border-color 0.2s; outline: none; overflow: hidden;">
+                        </td>
+                        <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
+                            <input type="number" class="planning-input" min="0" 
+                                value="${person.weekendDuties === undefined ? '' : person.weekendDuties}" 
+                                onchange="updateDuty(${index}, 'weekendDuties', this.value)"
+                                style="height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 13px; margin: 0; padding: 0 6px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 4px; background-color: #ffffff; transition: border-color 0.2s; outline: none; overflow: hidden;">
+                        </td>
+                        <td class="duty-gap-cell" style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
+                            <span style="margin-right: 8px; font-size: 13px; line-height: 24px; height: 24px; display: inline-block; color: #4b5563;">${person.minDaysBetween}</span>
+                            <a class="btn-floating btn-small waves-effect waves-light" onclick="decrementDutyGap(${index})"
+                               style="width: 24px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 12px; margin: 0 4px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #10b981; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s; overflow: hidden;">
+                                <i class="material-icons" style="line-height: 24px; font-size: 14px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; color: #ffffff;">arrow_downward</i>
                             </a>
-                            <a class="btn-floating btn-small waves-effect waves-light teal increment-btn" onclick="incrementAllDutyGaps()">
-                                <i class="material-icons">arrow_upward</i>
+                            <a class="btn-floating btn-small waves-effect waves-light" onclick="incrementDutyGap(${index})"
+                               style="width: 24px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 12px; margin: 0 4px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #10b981; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s; overflow: hidden;">
+                                <i class="material-icons" style="line-height: 24px; font-size: 14px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; color: #ffffff;">arrow_upward</i>
                             </a>
-                        </th>
-                        <th style="text-align: center;">Sil</th>
+                        </td>
+                        <td class="left-align" style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
+                            <a class="btn-floating btn-small" onclick="deletePerson(${index})"
+                               style="width: 24px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 12px; margin: 0 4px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #ef4444; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s; overflow: hidden;">
+                                <i class="material-icons" style="line-height: 24px; font-size: 14px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; color: #ffffff;">delete</i>
+                            </a>
+                        </td>
                     </tr>
                 `;
-                thead.innerHTML = headerHtml; // thead içeriğini güncelle
+            });
         
-                // Satırları (tbody) oluştur/güncelle
-                let bodyHtml = ''; // tbody içeriğini sıfırdan oluştur
-                // Grup sayısı hesaplaması
-                const maxGroupNumber = Math.max(10, Math.ceil(persons.length / 2)); // En az 10 grup veya personel sayısının yarısı
+            html += `</tbody>`;
+            tableContainer.innerHTML = html;
         
-                persons.forEach((person, index) => {
-                    // Pozitif Grup Seçenekleri
-                    let groupOptions = '<option value="0">Seç</option>';
-                    for (let i = 1; i <= maxGroupNumber; i++) {
-                        const currentGroup = parseInt(person.group) || 0;
-                        groupOptions += `<option value="${i}" ${currentGroup === i ? 'selected' : ''}>${i}</option>`;
-                    }
-        
-                     // Negatif Grup Seçenekleri
-                    let notTogetherGroupOptions = '<option value="0">Seç</option>';
-                     for (let i = 1; i <= maxGroupNumber; i++) {
-                         const currentNotTogetherGroup = parseInt(person.notTogetherGroup) || 0;
-                        notTogetherGroupOptions += `<option value="${i}" ${currentNotTogetherGroup === i ? 'selected' : ''}>${i}</option>`;
-                     }
-        
-        
-                    bodyHtml += `
-                        <tr style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; background-color: #f9fafb; transition: background-color 0.2s;">
-                             <td style="${notTogetherGroupingEnabled ? '' : 'display: none;'}; height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                                <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px; width: 60px; display: block; background-color: white;" onchange="updateNotTogetherGroup(${index}, this.value)">
-                                    ${notTogetherGroupOptions}
-                                </select>
-                             </td>
-        
-                             <td style="${groupingEnabled ? '' : 'display: none;'}; height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                                 <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px; width: 60px; display: block; background-color: white;" onchange="updateGroup(${index}, this.value)">
-                                    ${groupOptions}
-                                </select>
-                             </td>
-        
-                             <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box; font-family: 'Arial', sans-serif; color: #374151;">
-                                 ${person.name}
-                            </td>
-                             <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                                 <input type="number" class="planning-input" min="0"
-                                     value="${person.weekdayDuties === undefined ? '' : person.weekdayDuties}"
-                                     onchange="updateDuty(${index}, 'weekdayDuties', this.value)"
-                                     style="width: 50px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 13px; margin: 0; padding: 0 6px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 4px; background-color: #ffffff; transition: border-color 0.2s; outline: none; overflow: hidden;">
-                             </td>
-                              <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                                 <input type="number" class="planning-input" min="0"
-                                     value="${person.weekendDuties === undefined ? '' : person.weekendDuties}"
-                                     onchange="updateDuty(${index}, 'weekendDuties', this.value)"
-                                     style="width: 50px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 13px; margin: 0; padding: 0 6px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 4px; background-color: #ffffff; transition: border-color 0.2s; outline: none; overflow: hidden;">
-                             </td>
-                             <td class="duty-gap-cell" style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                                 <span style="margin-right: 8px; font-size: 13px; line-height: 24px; height: 24px; display: inline-block; color: #4b5563;">${person.minDaysBetween}</span>
-                                 <a class="btn-floating btn-small waves-effect waves-light" onclick="decrementDutyGap(${index})"
-                                    style="width: 24px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 12px; margin: 0 4px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #10b981; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s; overflow: hidden;">
-                                     <i class="material-icons" style="line-height: 24px; font-size: 14px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; color: #ffffff;">arrow_downward</i>
-                                 </a>
-                                 <a class="btn-floating btn-small waves-effect waves-light" onclick="incrementDutyGap(${index})"
-                                    style="width: 24px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 12px; margin: 0 4px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #10b981; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s; overflow: hidden;">
-                                     <i class="material-icons" style="line-height: 24px; font-size: 14px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; color: #ffffff;">arrow_upward</i>
-                                </a>
-                            </td>
-                            <td class="left-align" style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                                <a class="btn-floating btn-small" onclick="deletePerson(${index})"
-                                   style="width: 24px; height: 24px; min-height: 24px; max-height: 24px; line-height: 24px; font-size: 12px; margin: 0 4px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: #ef4444; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.2s; overflow: hidden;">
-                                    <i class="material-icons" style="line-height: 24px; font-size: 14px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; color: #ffffff;">delete</i>
-                                </a>
-                            </td>
-                        </tr>
-                    `;
-                });
-        
-                personTableBody.innerHTML = bodyHtml; // tbody içeriğini güncelle
-        
-                // Tooltip'leri yeniden başlat (DOM güncellendiği için önemli)
-                // Eski tooltip örneklerini temizleyip yeniden başlatmak daha güvenli olabilir
-                const existingTooltips = document.querySelectorAll('.tooltipped');
-                existingTooltips.forEach(tt => {
-                    const instance = M.Tooltip.getInstance(tt);
-                    if (instance) {
-                        instance.destroy();
-                    }
-                });
-                M.Tooltip.init(document.querySelectorAll('.tooltipped'));
-        
-            }
+            const selects = tableContainer.querySelectorAll('select');
+            selects.forEach(select => {
+                select.style.display = 'block';
+                select.removeAttribute('data-m-select');
+                if (select.M_FormSelect) {
+                    select.M_FormSelect.destroy();
+                }
+            });
         }
 
         function toggleGrouping() {
             renderTable();
         }
 
-        // Yeni Fonksiyon: Negatif Gruplamayı Aç/Kapat
-        function toggleNotTogetherGrouping() {
-            notTogetherGroupingEnabled = document.getElementById('notTogetherCheckbox').checked;
-            renderTable(); // Tabloyu yeniden çizerek sütunu göster/gizle
-        }
-        
-        // Yeni Fonksiyon: Personelin Negatif Grubunu Güncelle
-        function updateNotTogetherGroup(index, value) {
-            persons[index].notTogetherGroup = parseInt(value);
-            // renderTable() çağırmaya gerek yok, select değişimi tabloyu yeniden çizmez.
-            // Ancak gruplama mantığını etkileyen bir değişiklik olduğu için
-            // sonraki 'Otomatik Ata' işlemi bu güncel değeri kullanacaktır.
-            console.log(`${persons[index].name} için -Grup ${value} olarak ayarlandı.`);
+        function toggleNotTogether() {
+            notTogetherEnabled = document.getElementById('notTogetherCheckbox').checked;
+            renderTable();
         }
 
         function updateGroup(index, value) {
             persons[index].group = parseInt(value);
+            renderTable();
+        }
+
+        function updateNotTogether(index, value) {
+            persons[index].notTogether = parseInt(value);
             renderTable();
         }
 
@@ -1880,8 +1811,7 @@
         }
 
 
-        function generateCalendar() {
-
+       function generateCalendar() {
             if (persons.length < 3) {
                 M.toast({ html: 'Lütfen en az 3 personel ekleyin!' });
                 return;
@@ -1890,40 +1820,40 @@
             const startInput = document.getElementById('startDate').value;
             const endInput = document.getElementById('endDate').value;
             const dutyPerDayInput = document.getElementById('dutyPerDay').value.trim();
-
+        
             if (!dutyPerDayInput || dutyPerDayInput === "") {
                 M.toast({ html: 'Kaçar kişinin nöbetçi olacağını belirleyiniz!' });
                 return;
             }
-
+        
             const dutyPerDay = parseInt(dutyPerDayInput);
             if (isNaN(dutyPerDay) || dutyPerDay < 1) {
                 M.toast({ html: 'Lütfen geçerli bir sayı girin (1 veya daha fazla)!' });
                 return;
             }
-
+        
             if (!startInput || !endInput) {
                 M.toast({ html: 'Lütfen tarih seçin!' });
                 return;
             }
-
+        
             const [startDay, startMonth, startYear] = startInput.split('-').map(Number);
             const [endDay, endMonth, endYear] = endInput.split('-').map(Number);
             const start = new Date(startYear, startMonth - 1, startDay);
             const end = new Date(endYear, endMonth - 1, endDay);
             start.setHours(0, 0, 0, 0);
             end.setHours(0, 0, 0, 0);
-
+        
             const holidayInput = document.getElementById('holidays').value;
             const holidays = holidayInput ? holidayInput.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d)) : [];
-
+        
             selectedCells = {};
             history = [];
             historyIndex = -1;
             saveToHistory();
-
+        
             const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-
+        
             const dates = [];
             let weekendDays = 0;
             let weekdayDays = 0;
@@ -1935,66 +1865,38 @@
                 if (isWeekend) weekendDays++;
                 else weekdayDays++;
             }
-
+        
             const totalDuties = days * dutyPerDay;
             const totalWeekendDuties = weekendDays * dutyPerDay;
             const totalWeekdayDuties = weekdayDays * dutyPerDay;
-
-            let preplannedWeekendDuties = 0;
-            let preplannedWeekdayDuties = 0;
-            persons.forEach(person => {
-                if (person.weekendDuties !== undefined) preplannedWeekendDuties += person.weekendDuties;
-                if (person.weekdayDuties !== undefined) preplannedWeekdayDuties += person.weekdayDuties;
-            });
-
-            const adjustedTotalDuties = totalDuties - (preplannedWeekendDuties + preplannedWeekdayDuties);
-            const adjustedWeekendDuties = totalWeekendDuties - preplannedWeekendDuties;
-            const adjustedWeekdayDuties = totalWeekdayDuties - preplannedWeekdayDuties;
-
-            const unplannedPersons = persons.filter(p => p.weekdayDuties === undefined && p.weekendDuties === undefined);
-            const shuffledUnplanned = shuffleArray([...unplannedPersons]);
-            const unplannedCount = unplannedPersons.length;
-
-            const avgDutiesPerPerson = unplannedCount ? Math.floor(adjustedTotalDuties / unplannedCount) : 0;
-            const extraTotalDuties = unplannedCount ? adjustedTotalDuties % unplannedCount : 0;
-            const avgWeekendPerPerson = unplannedCount ? Math.floor(adjustedWeekendDuties / unplannedCount) : 0;
-            const extraWeekendDuties = unplannedCount ? adjustedWeekendDuties % unplannedCount : 0;
-
-            let personDutyAssignments = persons.map(person => {
-                if (person.weekdayDuties !== undefined || person.weekendDuties !== undefined) {
-                    return {
-                        person,
-                        totalDuties: (person.weekdayDuties || 0) + (person.weekendDuties || 0),
-                        weekendDuties: person.weekendDuties || 0,
-                        weekdayDuties: person.weekdayDuties || 0
-                    };
-                }
-                return null;
-            }).filter(p => p !== null);
-
-            shuffledUnplanned.forEach((person, index) => {
-                personDutyAssignments.push({
-                    person,
-                    totalDuties: avgDutiesPerPerson + (index < extraTotalDuties ? 1 : 0),
-                    weekendDuties: avgWeekendPerPerson + (index < extraWeekendDuties ? 1 : 0),
-                    weekdayDuties: 0
-                });
-            });
-
-            personDutyAssignments.forEach(assignment => {
-                if (assignment.person.weekdayDuties === undefined) {
-                    assignment.weekdayDuties = assignment.totalDuties - assignment.weekendDuties;
+        
+            // NotTogether gruplarını ayır
+            const notTogetherGroups = {};
+            persons.forEach((person, index) => {
+                const notTogetherId = person.notTogether || 0;
+                if (notTogetherId !== 0) {
+                    if (!notTogetherGroups[notTogetherId]) {
+                        notTogetherGroups[notTogetherId] = [];
+                    }
+                    notTogetherGroups[notTogetherId].push(person);
                 }
             });
-
-            personDutyAssignments.forEach(assignment => {
-                const originalPerson = persons.find(p => p.name === assignment.person.name);
-                originalPerson.weekdayDuties = assignment.weekdayDuties;
-                originalPerson.weekendDuties = assignment.weekendDuties;
+        
+            // Her notTogether grubu için ayrı ayrı nöbet dağıtımı yap
+            Object.values(notTogetherGroups).forEach(group => {
+                const groupWeekendDuties = totalWeekendDuties * group.length / persons.length;
+                const groupWeekdayDuties = totalWeekdayDuties * group.length / persons.length;
+                distributeDuties(group, groupWeekendDuties, groupWeekdayDuties, weekendDays, weekdayDays);
             });
-
+        
+            // Grup dışı kişilere nöbet dağıtımı yap
+            const ungroupedPersons = persons.filter(person => !person.notTogether || person.notTogether === 0);
+            const remainingWeekendDuties = totalWeekendDuties - Object.values(notTogetherGroups).reduce((sum, group) => sum + group.reduce((s, p) => s + (p.weekendDuties || 0), 0), 0);
+            const remainingWeekdayDuties = totalWeekdayDuties - Object.values(notTogetherGroups).reduce((sum, group) => sum + group.reduce((s, p) => s + (p.weekdayDuties || 0), 0), 0);
+            distributeDuties(ungroupedPersons, remainingWeekendDuties, remainingWeekdayDuties, weekendDays, weekdayDays);
+        
             renderTable();
-
+        
             let html = '<tr><th class="name-column">İsim</th>';
             const displayDates = [];
             for (let i = 0; i < days; i++) {
@@ -2004,7 +1906,7 @@
                 html += `<th>${date.getDate()}</th>`;
             }
             html += '</tr>';
-
+        
             persons.forEach((person, pIndex) => {
                 html += `<tr><td class="name-column">${person.name}</td>`;
                 dates.forEach((dateObj, dIndex) => {
@@ -2012,7 +1914,7 @@
                     const cellKey = `${pIndex}-${dIndex}`;
                     const isUnavailable = unavailableCells[cellKey];
                     const isSelected = selectedCells[cellKey];
-
+        
                     html += `
                         <td class="calendar-cell 
                             ${isWeekend ? 'holiday' : ''} 
@@ -2024,12 +1926,12 @@
                 });
                 html += '</tr>';
             });
-
+        
             document.getElementById('calendarTable').innerHTML = html;
-
+        
             const cells = document.querySelectorAll('.calendar-cell');
             const isMobile = isMobileDevice();
-        
+            
             cells.forEach(cell => {
                 if (!isMobile) {
                     cell.addEventListener('mousedown', startDragging);
@@ -2055,11 +1957,34 @@
                     }, { passive: false });
                 }
             });
-        
+            
             if (collapsibleCalendar) collapsibleCalendar.open(0);
             showCustomAlert();
             addGlowEffect();
             updateStatistics();
+        }
+        
+        function distributeDuties(personsToDistribute, targetWeekendDuties, targetWeekdayDuties, totalWeekendDays, totalWeekdayDays) {
+            const shuffledPersons = shuffleArray([...personsToDistribute]);
+            const personCount = shuffledPersons.length;
+            if (personCount === 0) return;
+        
+            const preplannedWeekendDuties = shuffledPersons.reduce((sum, p) => sum + (p.weekendDuties || 0), 0);
+            const preplannedWeekdayDuties = shuffledPersons.reduce((sum, p) => sum + (p.weekdayDuties || 0), 0);
+            const adjustedWeekendDuties = targetWeekendDuties - preplannedWeekendDuties;
+            const adjustedWeekdayDuties = targetWeekdayDuties - preplannedWeekdayDuties;
+        
+            const avgWeekendPerPerson = personCount ? Math.floor(adjustedWeekendDuties / personCount) : 0;
+            const extraWeekendDuties = personCount ? adjustedWeekendDuties % personCount : 0;
+            const avgWeekdayPerPerson = personCount ? Math.floor(adjustedWeekdayDuties / personCount) : 0;
+            const extraWeekdayDuties = personCount ? adjustedWeekdayDuties % personCount : 0;
+        
+            shuffledPersons.forEach((person, index) => {
+                if (person.weekdayDuties === undefined && person.weekendDuties === undefined) {
+                    person.weekendDuties = avgWeekendPerPerson + (index < extraWeekendDuties ? 1 : 0);
+                    person.weekdayDuties = avgWeekdayPerPerson + (index < extraWeekdayDuties ? 1 : 0);
+                }
+            });
         }
 
         function shuffleArray(array) {
@@ -2500,31 +2425,32 @@
             });
         }
 
-        function autoAssignDuties() {
-            validationErrors = []; // Hataları her seferinde sıfırla
+       function autoAssignDuties() {
+            validationErrors = [];
             if (!document.getElementById('calendarTable').innerHTML) {
                 M.toast({ html: 'Önce takvim oluşturun!' });
                 return;
             }
         
-            // ... (Mevcut tarih, dutyPerDay kontrolleri) ...
             const startInput = document.getElementById('startDate').value;
             const endInput = document.getElementById('endDate').value;
             const dutyPerDayInput = document.getElementById('dutyPerDay').value.trim();
         
             if (!dutyPerDayInput || dutyPerDayInput === "") {
-                 M.toast({ html: 'Kaçar kişinin nöbetçi olacağını belirleyiniz!' }); // Mesaj düzeltildi
-                 return;
+                M.toast({ html: 'Kaçar kişinin nöbetçi olacağını belirleyiniz!' });
+                return;
             }
+        
             const dutyPerDay = parseInt(dutyPerDayInput);
-             if (isNaN(dutyPerDay) || dutyPerDay < 1) {
-                 M.toast({ html: 'Lütfen geçerli bir sayı girin (1 veya daha fazla)!' });
-                 return;
-             }
-             if (!startInput || !endInput) {
+            if (isNaN(dutyPerDay) || dutyPerDay < 1) {
+                M.toast({ html: 'Lütfen geçerli bir sayı girin (1 veya daha fazla)!' });
+                return;
+            }
+        
+            if (!startInput || !endInput) {
                 M.toast({ html: 'Lütfen tarih seçin!' });
                 return;
-             }
+            }
         
             const [startDay, startMonth, startYear] = startInput.split('-').map(Number);
             const [endDay, endMonth, endYear] = endInput.split('-').map(Number);
@@ -2533,176 +2459,211 @@
             const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
             const holidayInput = document.getElementById('holidays').value;
             const holidays = holidayInput ? holidayInput.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d)) : [];
+        
             const dates = [];
-            // ... (dates dizisi oluşturma - mevcut kodunuzdaki gibi) ...
-             for (let i = 0; i < days; i++) {
-                 const date = new Date(start);
-                 date.setDate(date.getDate() + i);
-                 const isWeekend = date.getDay() === 0 || date.getDay() === 6 || holidays.includes(date.getDate());
-                 const isFriday = date.getDay() === 5;
-                 const isThursday = date.getDay() === 4;
-                 dates.push({ index: i, isWeekend, isFriday, isThursday });
-             }
+            for (let i = 0; i < days; i++) {
+                const date = new Date(start);
+                date.setDate(date.getDate() + i);
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6 || holidays.includes(date.getDate());
+                const isFriday = date.getDay() === 5;
+                const isThursday = date.getDay() === 4;
+                dates.push({ index: i, isWeekend, isFriday, isThursday });
+            }
         
-        
-            // ... (Mevcut müsaitlik, fazla atama, nöbet sayısı kontrolleri) ...
-            // ... (Bu kontrolleri validationErrors dizisine ekleyin) ...
-        
-            // YENİ: Grup Çakışma Kontrolü
-            const groupingEnabled = document.getElementById('groupingCheckbox').checked;
-            const notTogetherGroupingEnabled = document.getElementById('notTogetherCheckbox').checked;
-            let conflictingPersonnel = [];
-        
-            if (groupingEnabled && notTogetherGroupingEnabled) {
-                persons.forEach(person => {
-                    if (person.group > 0 && person.notTogetherGroup > 0) {
-                        conflictingPersonnel.push(person.name);
+            for (let d = 0; d < days; d++) {
+                let unavailableCount = 0;
+                for (let p = 0; p < persons.length; p++) {
+                    const cellKey = `${p}-${d}`;
+                    if (unavailableCells[cellKey]) {
+                        unavailableCount++;
                     }
-                });
+                }
+                if (unavailableCount === persons.length) {
+                    const date = new Date(start);
+                    date.setDate(date.getDate() + d);
+                    const dateStr = date.toLocaleDateString('tr-TR');
+                    M.toast({ html: `${dateStr} gününe müsait personel bırakmalısınız!`, displayLength: 8000 });
+                    return;
+                }
             }
         
-            if (conflictingPersonnel.length > 0) {
-                 validationErrors.push({
-                     type: 'error', // Bunu hata olarak işaretleyelim
-                     message: `Şu personeller hem '+' hem de '-' grubuna atanmış: ${conflictingPersonnel.join(', ')}`
-                 });
+            for (let d = 0; d < days; d++) {
+                let selectedCount = 0;
+                for (let p = 0; p < persons.length; p++) {
+                    const cellKey = `${p}-${d}`;
+                    if (selectedCells[cellKey]) {
+                        selectedCount++;
+                    }
+                }
+                if (selectedCount > dutyPerDay) {
+                    const date = new Date(start);
+                    date.setDate(date.getDate() + d);
+                    const dateStr = date.toLocaleDateString('tr-TR');
+                    M.toast({ html: `${dateStr} gününe fazla nöbetçi yazdınız! Beklenen: ${dutyPerDay}, Atanan: ${selectedCount}`, displayLength: 8000 });
+                    return;
+                }
             }
         
+            const totalExpectedDuties = days * dutyPerDay;
+            const expectedWeekdayDuties = dates.filter(d => !d.isWeekend).length * dutyPerDay;
+            const expectedWeekendDuties = dates.filter(d => d.isWeekend).length * dutyPerDay;
         
-            // Mevcut Grup Kontrolleriniz (Backend'e göndermeden önce frontend'de de yapılabilir)
-             if (groupingEnabled) {
-                 const groupSizes = {};
-                 persons.forEach(person => {
-                     if (person.group > 0) {
-                         groupSizes[person.group] = (groupSizes[person.group] || 0) + 1;
-                     }
-                 });
-                 for (const group in groupSizes) {
-                     if (groupSizes[group] > dutyPerDay) {
-                         validationErrors.push({
-                             type: 'error',
-                             message: `${group}. (+ Grup)'ta ${groupSizes[group]} kişi var, ancak nöbetçi sayısı ${dutyPerDay}!`
-                         });
-                     }
-                 }
-                // const hasAnyGroup = persons.some(person => person.group > 0);
-                // if (!hasAnyGroup && persons.length > 0) { // Personel varsa ve hiç grup atanmamışsa uyar
-                //     validationErrors.push({
-                //         type: 'warning', // Uyarı olarak işaretleyelim
-                //         message: '"Birlikte nöbet tutması gerekenler var mı?" seçili, ancak hiç (+) grup atanmamış!'
-                //     });
-                // }
-             }
+            let totalPlannedDuties = 0;
+            let plannedWeekdayDuties = 0;
+            let plannedWeekendDuties = 0;
         
-             // YENİ: Negatif Grup Kontrolleri (Backend'deki kontrolleri frontend'e de ekleyebilirsiniz)
-             if (notTogetherGroupingEnabled) {
-                 const notTogetherGroupCounts = {};
-                 let hasAnyNotTogetherGroup = false;
-                 persons.forEach(person => {
-                     if (person.notTogetherGroup > 0) {
-                         hasAnyNotTogetherGroup = true;
-                         notTogetherGroupCounts[person.notTogetherGroup] = (notTogetherGroupCounts[person.notTogetherGroup] || 0) + 1;
-                     }
-                 });
+            persons.forEach(person => {
+                plannedWeekdayDuties += person.weekdayDuties || 0;
+                plannedWeekendDuties += person.weekendDuties || 0;
+                totalPlannedDuties += (person.weekdayDuties || 0) + (person.weekendDuties || 0);
+            });
         
-                 for (const group in notTogetherGroupCounts) {
-                     if (notTogetherGroupCounts[group] < 2) {
-                          validationErrors.push({
-                              type: 'error',
-                              message: `${group}. (- Grup) tek kişi içeriyor, en az iki kişi olmalı!`
-                          });
-                     }
-                     // İsteğe bağlı: Negatif grup büyüklüğü > nöbetçi sayısı kontrolü
-                     // Backend bu kontrolü yapmıyor gibi görünüyor, ama istenirse eklenebilir.
-                     // if (notTogetherGroupCounts[group] > dutyPerDay) {
-                     //     validationErrors.push({
-                     //         type: 'warning', // Uyarı olabilir
-                     //         message: `${group}. (- Grup)'ta ${notTogetherGroupCounts[group]} kişi var, nöbetçi sayısı ${dutyPerDay}. Bu durum atamayı zorlaştırabilir.`
-                     //     });
-                     // }
-                 }
+            if (totalPlannedDuties !== totalExpectedDuties || 
+                plannedWeekdayDuties !== expectedWeekdayDuties || 
+                plannedWeekendDuties !== expectedWeekendDuties) {
+                const weekdayDiff = plannedWeekdayDuties - expectedWeekdayDuties;
+                const weekendDiff = plannedWeekendDuties - expectedWeekendDuties;
+                let customMessage = "";
         
-                // if (!hasAnyNotTogetherGroup && persons.length > 0) {
-                //      validationErrors.push({
-                //          type: 'warning', // Uyarı olarak işaretleyelim
-                //          message: '"Aynı nöbette bulunmaması gereken var mı?" seçili, ancak hiç (-) grup atanmamış!'
-                //      });
-                // }
-             }
+                if (totalPlannedDuties > totalExpectedDuties) {
+                    customMessage = "Fazla nöbet yazdınız! ";
+                    if (weekdayDiff > 0) customMessage += `${weekdayDiff} miktar hafta içini azaltın`;
+                    if (weekendDiff > 0) customMessage += `${weekdayDiff > 0 && weekendDiff > 0 ? ' ve ' : ''}${weekendDiff} miktar hafta sonunu azaltın`;
+                    customMessage += ".";
+                } else if (totalPlannedDuties < totalExpectedDuties) {
+                    customMessage = "Az nöbet yazdınız! ";
+                    if (weekdayDiff < 0) customMessage += `${Math.abs(weekdayDiff)} miktar hafta içini artırın`;
+                    if (weekendDiff < 0) customMessage += `${weekdayDiff < 0 && weekendDiff < 0 ? ' ve ' : ''}${Math.abs(weekendDiff)} miktar hafta sonunu artırın`;
+                    customMessage += ".";
+                } else {
+                    customMessage = "Nöbet dağılımı uyumsuz! ";
+                    if (weekdayDiff > 0) customMessage += `${weekdayDiff} miktar hafta içini azaltın`;
+                    if (weekendDiff < 0) customMessage += `${weekdayDiff > 0 ? ' ve ' : ''}${Math.abs(weekendDiff)} miktar hafta sonunu artırın`;
+                    if (weekendDiff > 0) customMessage += `${weekdayDiff > 0 || weekendDiff < 0 ? ' ve ' : ''}${weekendDiff} miktar hafta sonunu azaltın`;
+                    if (weekdayDiff < 0) customMessage += `${weekendDiff > 0 || weekdayDiff > 0 ? ' ve ' : ''}${Math.abs(weekdayDiff)} miktar hafta içini artırın`;
+                    customMessage += ".";
+                }
         
-             // Hata veya Kritik Uyarı Varsa Göster ve Dur
-            if (validationErrors.some(e => e.type === 'error')) { // Sadece 'error' tipindekiler işlemi durdursun
-                showErrorModal(); // Hata modalını göster
-                return; // İşlemi durdur
-             } else if (validationErrors.length > 0) { // Sadece 'warning' varsa yine de modalı göster ama devam etme seçeneği sun
-                showErrorModal(); // Uyarıları göster, kullanıcı Devam Et'e basarsa ilerleyecek
-                 return; // Modal'daki confirmSend fonksiyonu API çağrısını yapacak
-             }
+                M.toast({ html: customMessage, displayLength: 8000 });
+                return;
+            }
         
-            // ---- API Çağrısı ----
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        
-            // personnelDuties dizisini oluştururken notTogetherGroup'u da ekle
-            const personnelDuties = persons.map((person, index) => ({ // index'i burada alalım
-                 name: person.name,
-                 weekdayLeft: person.weekdayDuties || 0,
-                 weekendLeft: person.weekendDuties || 0,
-                 minDaysBetween: person.minDaysBetween,
-                 dutyDays: [], // Bu backend'e gönderilmiyor gibi duruyor? Kontrol edelim.
-                 originalIndex: index, // Backend'in pIndex olarak kullandığı değer
-                 group: person.group || 0,
-                 // notTogetherGroup: person.notTogetherGroup || 0 // Backend personnel objesinde bunu beklemiyor
+            const personnelDuties = persons.map(person => ({
+                name: person.name,
+                weekdayLeft: person.weekdayDuties || 0,
+                weekendLeft: person.weekendDuties || 0,
+                minDaysBetween: person.minDaysBetween,
+                dutyDays: [],
+                originalIndex: persons.findIndex(p => p.name === person.name),
+                group: person.group || 0,
+                notTogether: person.notTogether || 0
             }));
         
-             // YENİ: notTogetherGroups dizisini oluştur
-            const notTogetherGroupsData = persons.map(person => person.notTogetherGroup || 0);
+            document.getElementById('loadingOverlay').style.display = 'flex';
         
-        
-            // ... (preAssignedDays hesaplaması - mevcut kodunuzdaki gibi) ...
             const preAssignedDays = {};
-             Object.keys(selectedCells).forEach(key => {
-                 if (selectedCells[key]) {
-                     const [pIndex, dIndex] = key.split('-').map(Number);
-                     // personnelDuties'deki doğru kişiyi originalIndex ile bul
-                     const personDutyInfo = personnelDuties.find(p => p.originalIndex === pIndex);
-                     if (personDutyInfo && dIndex >= 0 && dIndex < dates.length) {
-                          preAssignedDays[key] = true;
-                         // Not: weekendLeft/weekdayLeft güncellemesi backend'de yapılıyor gibi, burada yapmaya gerek yok.
-                         // Backend'e gönderilen left değerleri, pre-assign hariç kalan değerler olmalı.
-                         // Bu nedenle generateCalendar'daki gibi burada left değerlerini *azaltmamalıyız*.
-                         // Backend, gönderilen left değerlerini ve preAssigned'leri dikkate alarak hesap yapmalı.
-                         // Eğer backend bunu yapmıyorsa, buradaki left değerlerini pre-assign'e göre azaltıp göndermek gerekir.
-                         // Sağlanan backend koduna göre (solver içinde):
-                         // total_duties == total_planned + pre_weekend + pre_weekday
-                         // weekend_duties == personnel[p].get("weekendLeft", 0) + pre_weekend
-                         // Bu, backend'in pre-assigned'leri hesaba kattığını gösteriyor. Frontend'de left değerlerini *azaltmayın*.
-                     }
-                 }
-             });
-        
+            Object.keys(selectedCells).forEach(key => {
+                if (selectedCells[key]) {
+                    const [pIndex, dIndex] = key.split('-').map(Number);
+                    const person = personnelDuties.find(p => p.originalIndex === pIndex);
+                    if (person && dIndex >= 0 && dIndex < dates.length) {
+                        preAssignedDays[key] = true;
+                        if (dates[dIndex].isWeekend) {
+                            person.weekendLeft = Math.max(0, person.weekendLeft - 1);
+                        } else {
+                            person.weekdayLeft = Math.max(0, person.weekdayLeft - 1);
+                        }
+                        person.dutyDays.push(dIndex);
+                    }
+                }
+            });
         
             const balanceFridays = document.getElementById('balanceFridays').checked;
             const balanceThursdays = document.getElementById('balanceThursdays').checked;
+            const notTogetherGroups = persons.map(person => person.notTogether || 0);
         
-            // Backend'e gönderilecek veri objesi
+            // Validation: Çakışan grup atamaları kontrolü
+            persons.forEach(person => {
+                if (person.group !== 0 && person.notTogether !== 0) {
+                    validationErrors.push({
+                        type: 'error',
+                        message: `${person.name} hem birlikte nöbet tutma (+Grup) hem de aynı nöbette olmama (-Grup) grubuna eklenemez!`
+                    });
+                }
+            });
+        
+            // Grup kontrolü (+Grup)
+            const groupingEnabled = document.getElementById('groupingCheckbox').checked;
+            if (groupingEnabled) {
+                const groupSizes = {};
+                persons.forEach(person => {
+                    if (person.group > 0) {
+                        groupSizes[person.group] = (groupSizes[person.group] || 0) + 1;
+                    }
+                });
+            
+                for (const group in groupSizes) {
+                    if (groupSizes[group] > dutyPerDay) {
+                        validationErrors.push({
+                            type: 'error',
+                            message: `${group}. +grup (${groupSizes[group]} kişi) nöbetçi sayısından (${dutyPerDay}) fazla!`
+                        });
+                    }
+                }
+            
+                const hasAnyGroup = persons.some(person => person.group > 0);
+                if (!hasAnyGroup) {
+                    validationErrors.push({
+                        type: 'error',
+                        message: '"Birlikte nöbet tutması gerekenler var mı?" seçili, ancak hiç +grup atanmamış!'
+                    });
+                }
+            }
+        
+            // NotTogether kontrolü (-Grup)
+            const notTogetherEnabled = document.getElementById('notTogetherCheckbox').checked;
+            if (notTogetherEnabled) {
+                const notTogetherSizes = {};
+                persons.forEach(person => {
+                    if (person.notTogether > 0) {
+                        notTogetherSizes[person.notTogether] = (notTogetherSizes[person.notTogether] || 0) + 1;
+                    }
+                });
+        
+                const hasAnyNotTogether = persons.some(person => person.notTogether > 0);
+                if (!hasAnyNotTogether) {
+                    validationErrors.push({
+                        type: 'error',
+                        message: '"Aynı nöbette bulunmaması gereken var mı?" seçili, ancak hiç -grup atanmamış!'
+                    });
+                }
+            }
+        
+            // Hata varsa modal aç ve işlemi durdur
+            if (validationErrors.length > 0) {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showErrorModal();
+                return;
+            }
+        
             const data = {
-                personnel: personnelDuties, // originalIndex ve group içeriyor
+                personnel: personnelDuties,
                 totalDays: days,
-                weekendDays: dates.filter(d => d.isWeekend).map(d=> d.index), // Sadece indexleri gönder
-                fridayDays: dates.filter(d => d.isFriday).map(d=> d.index), // Sadece indexleri gönder
-                thursdayDays: dates.filter(d => d.isThursday).map(d=> d.index), // Sadece indexleri gönder
+                weekendDays: dates.map(d => d.isWeekend ? d.index : null).filter(d => d !== null),
+                fridayDays: dates.map(d => d.isFriday ? d.index : null).filter(d => d !== null),
+                thursdayDays: dates.map(d => d.isThursday ? d.index : null).filter(d => d !== null),
                 unavailableCells: unavailableCells || {},
                 preAssignedDays: preAssignedDays,
+                maxConsecutiveDuties: 1,
                 dutyPerDay: dutyPerDay,
                 balanceFridays: balanceFridays,
                 balanceThursdays: balanceThursdays,
-                notTogetherGroups: notTogetherGroupsData // Yeni eklenen veri
+                notTogetherGroups: notTogetherGroups
             };
         
-            saveToHistory(); // API çağrısından önce durumu kaydet
+            saveToHistory();
         
-            // const CLOUD_FUNCTIONS_URL = 'YOUR_CLOUD_FUNCTION_URL'; // URL'nizi buraya yazın
-             const CLOUD_FUNCTIONS_URL = 'https://optimize-nobet-174463354439.us-central1.run.app'; // Mevcut URL
+            const CLOUD_FUNCTIONS_URL = 'https://optimize-nobet-88931343134.us-central1.run.app';
         
             fetch(CLOUD_FUNCTIONS_URL, {
                 method: 'POST',
@@ -2712,151 +2673,33 @@
                 body: JSON.stringify(data)
             })
             .then(response => {
-                 // Durum kodunu ve JSON verisini birlikte işle
-                 return response.json().then(jsonData => ({ status: response.status, data: jsonData }));
+                return response.json().then(jsonData => ({ status: response.status, data: jsonData }));
             })
-            .then(({ status, data }) => { // Obje olarak al
+            .then(({ status, data }) => {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                if (status === 200 && Array.isArray(data.assignments)) { // Başarılı durum kontrolü
-                    // Mevcut selectedCells'i temizlemeden önce yedekle (opsiyonel)
-                    // const previousSelectedCells = { ...selectedCells };
-        
-                    // Yeni atamaları uygulamadan önce mevcut seçimi temizleyebiliriz
-                     selectedCells = {}; // Backend'den gelen sonuçlarla sıfırdan doldur
-        
+                if (status === 200 && Array.isArray(data.assignments)) {
                     data.assignments.forEach(a => {
-                         // Backend'den gelen pIndex'in personnelDuties'deki originalIndex'e karşılık geldiğini varsayıyoruz
-                        const cellKey = `<span class="math-inline">\{a\.pIndex\}\-</span>{a.dayIndex}`;
+                        const cellKey = `${a.pIndex}-${a.dayIndex}`;
                         selectedCells[cellKey] = true;
                     });
-                    updateCalendar(); // Takvimi yeni atamalarla güncelle
-                    updateStatistics(); // İstatistikleri güncelle
-                    saveToHistory(); // Başarılı sonuç sonrası durumu kaydet
-                     showToast('Tüm nöbetler atandı!', 4000);
+                    updateCalendar();
+                    updateStatistics();
+                    saveToHistory();
+                    showToast('Tüm nöbetler atandı!', 4000);
                 } else {
-                    // Hata durumunu işle
-                    let errorMessage = data.error || `Sunucu hatası: ${status}`;
-                     // Backend'den gelen özel hata mesajlarını yakala (opsiyonel)
-                     if (status === 400 && errorMessage.includes("Nöbet atamaları yapılamadı")) {
-                         errorMessage = "Hata: Nöbet ertesi boşluk sayısını azaltmayı veya personel planını/takvim işaretlemelerini kontrol etmeyi deneyin!";
-                     } else if (status === 400 && errorMessage.includes("Cuma veya Perşembe dengeleme başarısız")) {
-                        errorMessage = "Hata: Cuma/Perşembe dengeleme başarısız. Bu seçenekleri kapatıp tekrar deneyin veya personel planını gözden geçirin.";
-                     } else if (status === 400 && errorMessage.includes("hem birlikte nöbet tutma hem de aynı nöbette olmama")) {
-                         // Bu hata zaten frontend'de yakalanıyor ama yine de gösterilebilir
-                         errorMessage = data.error; // Backend mesajını doğrudan kullan
-                     } else if (status === 400 && errorMessage.includes("-grup tek kişi içeriyor")) {
-                         // Bu hata zaten frontend'de yakalanıyor ama yine de gösterilebilir
-                         errorMessage = data.error; // Backend mesajını doğrudan kullan
-                     }
-                     showToast(errorMessage, 10000); // Hata mesajını uzun süre göster
-                     // Başarısız olursa, belki bir önceki duruma dönmek isteyebilirsiniz (eğer yedeklediysek)
-                     // selectedCells = previousSelectedCells; updateCalendar();
+                    let errorMessage = data.error || 'Bilinmeyen bir hata oluştu';
+                    if (status === 400 && errorMessage.includes('Nöbet atamaları yapılamadı')) {
+                        errorMessage = 'Hata: Nöbet ertesi boşluk sayısını azaltmayı deneyin!';
+                    } else if (status === 400 && errorMessage.includes('Cuma veya Perşembe dengeleme başarısız')) {
+                        errorMessage = 'Hata: Cuma veya Perşembe dengeleme başarısız, bu seçenekleri kapatıp tekrar deneyin!';
+                    }
+                    showToast(errorMessage, 10000);
                 }
             })
             .catch(error => {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                console.error('Fetch Error:', error);
-                 showToast('Sunucuyla iletişim kurulamadı: ' + error.message, 10000);
-                 // Başarısız olursa, belki bir önceki duruma dönmek isteyebilirsiniz
+                showToast('Sunucuyla bağlantı kurulamadı: ' + error.message, 10000);
             });
-        }
-
-        function confirmSend() {
-    // Sadece uyarılar varken bu fonksiyon çağrılmalı
-    // Tekrar API çağrısını tetiklemeden önce loading overlay'i gösterelim
-    // Not: autoAssignDuties zaten çağrılmıştı ve validationErrors dolu.
-    // Bu yüzden doğrudan fetch kısmını tekrar çalıştırmak yerine,
-    // autoAssignDuties'i tekrar çağırmak daha temiz olabilir, ancak bu
-    // validasyonları tekrar yapar. Alternatif olarak, fetch kısmını ayrı bir fonksiyona alabiliriz.
-    // Şimdilik basit tutalım: autoAssignDuties'in içindeki API call kısmını
-    // (loading overlay gösterme ve sonrası) buraya taşıyabilir veya
-    // autoAssignDuties'i validasyonları atlayacak şekilde modifiye edebiliriz.
-
-    // Basit yaklaşım: autoAssignDuties'i tekrar çağırmak (validasyonları tekrar yapar ama temiz)
-    // Ancak bu durumda sonsuz döngü riski var.
-    // Daha iyi: Fetch işlemini ayrı bir fonksiyona alalım.
-
-    // Örnek: Fetch işlemini içeren yeni fonksiyon
-    function performApiCall(data) {
-         document.getElementById('loadingOverlay').style.display = 'flex';
-         const CLOUD_FUNCTIONS_URL = 'https://optimize-nobet-88931343134.us-central1.run.app';
-
-         fetch(CLOUD_FUNCTIONS_URL, { /* ... fetch ayarları ... */ body: JSON.stringify(data) })
-             .then(response => response.json().then(jsonData => ({ status: response.status, data: jsonData })))
-             .then(({ status, data }) => {
-                  document.getElementById('loadingOverlay').style.display = 'none';
-                  if (status === 200 && Array.isArray(data.assignments)) {
-                      selectedCells = {}; // Temizle
-                      data.assignments.forEach(a => { selectedCells[`<span class="math-inline">\{a\.pIndex\}\-</span>{a.dayIndex}`] = true; });
-                      updateCalendar();
-                      updateStatistics();
-                      saveToHistory();
-                      showToast('Tüm nöbetler atandı! (Uyarılarla)', 4000);
-                 } else {
-                     let errorMessage = data.error || `Sunucu hatası: ${status}`;
-                      // ... (hata mesajı işleme) ...
-                      showToast(errorMessage, 10000);
-                 }
-             })
-             .catch(error => {
-                 document.getElementById('loadingOverlay').style.display = 'none';
-                 console.error('Fetch Error:', error);
-                 showToast('Sunucuyla iletişim kurulamadı: ' + error.message, 10000);
-             });
-    }
-
-            // confirmSend içinde veriyi tekrar oluşturup performApiCall'u çağırın
-            // Not: Bu, autoAssignDuties içindeki veri hazırlama mantığının tekrarı demek.
-            // En temiz yol, autoAssignDuties'in veri hazırlama kısmını ayrı bir fonksiyona almak
-            // ve hem autoAssignDuties hem de confirmSend tarafından çağırmak.
-        
-            // Şimdilik, autoAssignDuties'in içindeki data hazırlama kodunu buraya kopyalayıp
-            // performApiCall(hazirlananData) şeklinde çağırabiliriz.
-            // (Bu kod tekrarı yaratır, ideal değil ama işlevsel)
-        
-             // --- autoAssignDuties'den Kopyalanan Veri Hazırlama Başlangıcı ---
-             const startInput = document.getElementById('startDate').value;
-             const endInput = document.getElementById('endDate').value;
-             const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value.trim());
-             // ... (start, end, days, dates, holidays vb. hesaplamalar) ...
-             const [startDay, startMonth, startYear] = startInput.split('-').map(Number);
-             const [endDay, endMonth, endYear] = endInput.split('-').map(Number);
-             const start = new Date(startYear, startMonth - 1, startDay);
-             const end = new Date(endYear, endMonth - 1, endDay);
-             const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-             const holidayInput = document.getElementById('holidays').value;
-             const holidays = holidayInput ? holidayInput.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d)) : [];
-             const dates = [];
-             for (let i = 0; i < days; i++) { /* ... dates doldurma ... */
-                const date = new Date(start);
-                date.setDate(date.getDate() + i);
-                const isWeekend = date.getDay() === 0 || date.getDay() === 6 || holidays.includes(date.getDate());
-                const isFriday = date.getDay() === 5;
-                const isThursday = date.getDay() === 4;
-                dates.push({ index: i, isWeekend, isFriday, isThursday });
-             }
-            const personnelDuties = persons.map((person, index) => ({ /* ... personel objesi ... */
-                name: person.name, weekdayLeft: person.weekdayDuties || 0, weekendLeft: person.weekendDuties || 0,
-                minDaysBetween: person.minDaysBetween, originalIndex: index, group: person.group || 0,
-            }));
-            const notTogetherGroupsData = persons.map(person => person.notTogetherGroup || 0);
-            const preAssignedDays = {}; Object.keys(selectedCells).forEach(key => { /* ... preAssignedDays doldurma ... */
-                if (selectedCells[key]) preAssignedDays[key] = true;
-            });
-            const balanceFridays = document.getElementById('balanceFridays').checked;
-            const balanceThursdays = document.getElementById('balanceThursdays').checked;
-            const preparedData = { /* ... data objesi ... */
-                 personnel: personnelDuties, totalDays: days,
-                 weekendDays: dates.filter(d => d.isWeekend).map(d=> d.index),
-                 fridayDays: dates.filter(d => d.isFriday).map(d=> d.index),
-                 thursdayDays: dates.filter(d => d.isThursday).map(d=> d.index),
-                 unavailableCells: unavailableCells || {}, preAssignedDays: preAssignedDays,
-                 dutyPerDay: dutyPerDay, balanceFridays: balanceFridays, balanceThursdays: balanceThursdays,
-                 notTogetherGroups: notTogetherGroupsData
-             };
-             // --- Veri Hazırlama Sonu ---
-        
-             performApiCall(preparedData); // API çağrısını yap
         }
 
         function updateCalendar() {
@@ -2881,9 +2724,9 @@
             }
         }
 
-        function uploadPersonnel(event) {
+       function uploadPersonnel(event) {
             if (isUploading) return;
-
+        
             const file = event.target.files[0];
             if (!file) {
                 M.toast({ html: 'Lütfen bir dosya seçin!' });
@@ -2893,42 +2736,40 @@
                 M.toast({ html: 'Lütfen geçerli bir CSV dosyası yükleyin!' });
                 return;
             }
-
+        
             isUploading = true;
             const loadingOverlay = document.getElementById('loadingOverlay');
             loadingOverlay.style.display = 'flex';
-
+        
             const reader = new FileReader();
             reader.onload = function(e) {
                 const text = e.target.result;
                 const rows = text.split('\n').map(row => row.split(',').map(cell => cell.trim()));
                 const headers = rows[0];
-
+        
                 if (headers[0] !== 'İsim') {
                     M.toast({ html: 'Geçersiz CSV formatı! Başlık "İsim" olmalı.' });
                     loadingOverlay.style.display = 'none';
                     isUploading = false;
                     return;
                 }
-
+        
                 const newPersons = [];
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (row[0]) {
                         const name = row[0].replace(/"/g, '').trim().toUpperCase();
-                        // CSV'de 5. sütun (- Grup) olup olmadığını kontrol et veya varsayılan ata
-                        const notTogetherGroupValue = row[4] ? parseInt(row[4]) : 0;
                         newPersons.push({
                             name: name,
                             weekdayDuties: row[1] ? parseInt(row[1]) : undefined,
                             weekendDuties: row[2] ? parseInt(row[2]) : undefined,
                             minDaysBetween: row[3] ? parseInt(row[3]) : 1,
-                            group: row[5] ? parseInt(row[5]) : 0, // + Grup sütununu da ekleyebilirsiniz (varsa)
-                            notTogetherGroup: notTogetherGroupValue // Yeni özellik
+                            group: row[4] ? parseInt(row[4]) : 0,
+                            notTogether: row[5] ? parseInt(row[5]) : 0
                         });
                     }
                 }
-
+        
                 persons = newPersons.filter(p => p.name && !persons.some(existing => existing.name === p.name));
                 renderTable();
                 M.toast({ html: 'Personel listesi başarıyla yüklendi!' });
@@ -2949,40 +2790,34 @@
             return window.btoa(binary);
         }
 
-        // downloadPersonnel fonksiyonuna - Grup ekleme
-function downloadPersonnel() {
-    const csvRows = [];
-    // Başlıkları dinamik olarak ekle
-    const headers = ['İsim', 'Hafta İçi', 'Hafta Sonu', 'Nöbet Ertesi Boşluk'];
-    if (notTogetherGroupingEnabled) headers.splice(1, 0, '- Grup'); // İsim'den sonra ekle
-    if (groupingEnabled) headers.splice(notTogetherGroupingEnabled ? 2 : 1, 0, '+ Grup'); // - Grup varsa ondan sonra, yoksa İsim'den sonra ekle
-
-    csvRows.push(headers.join(','));
-
-    persons.forEach(person => {
-        const row = [
-            `"${person.name}"`,
-            person.weekdayDuties !== undefined ? person.weekdayDuties : '',
-            person.weekendDuties !== undefined ? person.weekendDuties : '',
-            person.minDaysBetween
-        ];
-         if (notTogetherGroupingEnabled) row.splice(1, 0, person.notTogetherGroup || '0');
-         if (groupingEnabled) row.splice(notTogetherGroupingEnabled ? 2 : 1, 0, person.group || '0');
-
-        csvRows.push(row.join(','));
-    });
-    // ... (CSV indirme kalan kısmı) ...
-     const csvContent = csvRows.join('\n');
-     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-     const link = document.createElement('a');
-     const url = URL.createObjectURL(blob);
-     link.setAttribute('href', url);
-     link.setAttribute('download', `personel_listesi_${new Date().toISOString().split('T')[0]}.csv`);
-     document.body.appendChild(link);
-     link.click();
-     document.body.removeChild(link);
-     M.toast({ html: 'Personel listesi CSV olarak indirildi!' });
-}
+        function downloadPersonnel() {
+            const csvRows = [];
+            const headers = ['İsim', 'Hafta İçi', 'Hafta Sonu', 'Nöbet Ertesi Boşluk', '+Grup', '-Grup'];
+            csvRows.push(headers.join(','));
+        
+            persons.forEach(person => {
+                const row = [
+                    `"${person.name}"`,
+                    person.weekdayDuties !== undefined ? person.weekdayDuties : '',
+                    person.weekendDuties !== undefined ? person.weekendDuties : '',
+                    person.minDaysBetween,
+                    person.group || 0,
+                    person.notTogether || 0
+                ];
+                csvRows.push(row.join(','));
+            });
+        
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `personel_listesi_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            M.toast({ html: 'Personel listesi CSV olarak indirildi!' });
+        }
 
         function clearCalendar() {
             saveToHistory();
