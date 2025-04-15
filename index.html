@@ -1701,7 +1701,9 @@
             persons[index].notTogetherGroup = parseInt(value);
             if (persons[index].group !== 0 && persons[index].notTogetherGroup !== 0) {
                 M.toast({ html: `${persons[index].name} hem birlikte nöbet tutma hem de aynı nöbette olmama grubuna eklenemez!` });
+                persons[index].notTogetherGroup = 0;
             }
+            resetDuties();
             renderTable();
         }
 
