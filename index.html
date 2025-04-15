@@ -1697,13 +1697,27 @@
             renderTable();
         }
         
+        let lastToast = { message: null, timestamp: 0 };
+
         function updateNotTogetherGroup(index, value) {
             persons[index].notTogetherGroup = parseInt(value);
             if (persons[index].group !== 0 && persons[index].notTogetherGroup !== 0) {
-                M.toast({ html: `${persons[index].name} hem birlikte nöbet tutma hem de aynı nöbette olmama grubuna eklenemez!` });
+                const message = `${persons[index].name} hem birlikte nöbet tutma hem de aynı nöbette olmama grubuna eklenemez!`;
+                const currentTime = Date.now();
+        
+                // Aynı mesaj 10 saniye içinde tekrar gösterilmesin
+                if (lastToast.message !== message || currentTime - lastToast.timestamp > 10000) {
+                    M.Toast.dismissAll(); // Önceki toast'ları sil
+                    M.toast({ html: message });
+                    lastToast = { message, timestamp: currentTime };
+                }
                 persons[index].notTogetherGroup = 0;
             }
-            resetDuties();
+            // Nöbet sayılarını sıfırla, ama uyarı gösterme
+            persons.forEach(person => {
+                person.weekdayDuties = undefined;
+                person.weekendDuties = undefined;
+            });
             renderTable();
         }
 
@@ -1841,252 +1855,255 @@
 
 
       function generateCalendar() {
-                if (persons.length < 3) {
-                    M.toast({ html: 'Lütfen en az 3 personel ekleyin!' });
-                    return;
-                }
-            
-                const startInput = document.getElementById('startDate').value;
-                const endInput = document.getElementById('endDate').value;
-                const dutyPerDayInput = document.getElementById('dutyPerDay').value.trim();
-            
-                if (!dutyPerDayInput || dutyPerDayInput === "") {
-                    M.toast({ html: 'Kaçar kişinin nöbetçi olacağını belirleyiniz!' });
-                    return;
-                }
-            
-                const dutyPerDay = parseInt(dutyPerDayInput);
-                if (isNaN(dutyPerDay) || dutyPerDay < 1) {
-                    M.toast({ html: 'Lütfen geçerli bir sayı girin (1 veya daha fazla)!' });
-                    return;
-                }
-            
-                if (!startInput || !endInput) {
-                    M.toast({ html: 'Lütfen tarih seçin!' });
-                    return;
-                }
-            
-                const [startDay, startMonth, startYear] = startInput.split('-').map(Number);
-                const [endDay, endMonth, endYear] = endInput.split('-').map(Number);
-                const start = new Date(startYear, startMonth - 1, startDay);
-                const end = new Date(endYear, endMonth - 1, endDay);
-                start.setHours(0, 0, 0, 0);
-                end.setHours(0, 0, 0, 0);
-            
-                const holidayInput = document.getElementById('holidays').value;
-                const holidays = holidayInput ? holidayInput.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d)) : [];
-            
-                selectedCells = {};
-                history = [];
-                historyIndex = -1;
-                saveToHistory();
-            
-                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-            
-                const dates = [];
-                let weekendDays = 0;
-                let weekdayDays = 0;
-                for (let i = 0; i < days; i++) {
-                    const date = new Date(start);
-                    date.setDate(date.getDate() + i);
-                    const isWeekend = date.getDay() === 0 || date.getDay() === 6 || holidays.includes(date.getDate());
-                    dates.push({ date: date.toISOString(), isWeekend });
-                    if (isWeekend) weekendDays++;
-                    else weekdayDays++;
-                }
-            
-                const totalDuties = days * dutyPerDay;
-                const totalWeekendDuties = weekendDays * dutyPerDay;
-                const totalWeekdayDuties = weekdayDays * dutyPerDay;
-            
-                let preplannedWeekendDuties = 0;
-                let preplannedWeekdayDuties = 0;
-                persons.forEach(person => {
-                    if (person.weekendDuties !== undefined) preplannedWeekendDuties += person.weekendDuties;
-                    if (person.weekdayDuties !== undefined) preplannedWeekdayDuties += person.weekdayDuties;
-                });
-            
-                const adjustedTotalDuties = totalDuties - (preplannedWeekendDuties + preplannedWeekdayDuties);
-                const adjustedWeekendDuties = totalWeekendDuties - preplannedWeekendDuties;
-                const adjustedWeekdayDuties = totalWeekdayDuties - preplannedWeekdayDuties;
-            
-                const notTogetherEnabled = document.getElementById('notTogetherCheckbox').checked;
-            
-                // -Grup’ları analiz et
-                let notTogetherGroups = {};
-                let ungroupedPersons = [];
-                let preplannedPersons = [];
-                if (notTogetherEnabled) {
-                    persons.forEach((person, index) => {
-                        if (person.weekdayDuties !== undefined || person.weekendDuties !== undefined) {
-                            preplannedPersons.push(index);
-                        } else {
-                            const groupId = person.notTogetherGroup || 0;
-                            if (groupId > 0) {
-                                if (!notTogetherGroups[groupId]) {
-                                    notTogetherGroups[groupId] = [];
-                                }
-                                notTogetherGroups[groupId].push(index);
-                            } else {
-                                ungroupedPersons.push(index);
+            if (persons.length < 3) {
+                M.toast({ html: 'Lütfen en az 3 personel ekleyin!' });
+                return;
+            }
+        
+            const startInput = document.getElementById('startDate').value;
+            const endInput = document.getElementById('endDate').value;
+            const dutyPerDayInput = document.getElementById('dutyPerDay').value.trim();
+        
+            if (!dutyPerDayInput || dutyPerDayInput === "") {
+                M.toast({ html: 'Kaçar kişinin nöbetçi olacağını belirleyiniz!' });
+                return;
+            }
+        
+            const dutyPerDay = parseInt(dutyPerDayInput);
+            if (isNaN(dutyPerDay) || dutyPerDay < 1) {
+                M.toast({ html: 'Lütfen geçerli bir sayı girin (1 veya daha fazla)!' });
+                return;
+            }
+        
+            if (!startInput || !endInput) {
+                M.toast({ html: 'Lütfen tarih seçin!' });
+                return;
+            }
+        
+            const [startDay, startMonth, startYear] = startInput.split('-').map(Number);
+            const [endDay, endMonth, endYear] = endInput.split('-').map(Number);
+            const start = new Date(startYear, startMonth - 1, startDay);
+            const end = new Date(endYear, endMonth - 1, endDay);
+            start.setHours(0, 0, 0, 0);
+            end.setHours(0, 0, 0, 0);
+        
+            const holidayInput = document.getElementById('holidays').value;
+            const holidays = holidayInput ? holidayInput.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d)) : [];
+        
+            selectedCells = {};
+            history = [];
+            historyIndex = -1;
+            saveToHistory();
+        
+            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        
+            const dates = [];
+            let weekendDays = 0;
+            let weekdayDays = 0;
+            for (let i = 0; i < days; i++) {
+                const date = new Date(start);
+                date.setDate(date.getDate() + i);
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6 || holidays.includes(date.getDate());
+                dates.push({ date: date.toISOString(), isWeekend });
+                if (isWeekend) weekendDays++;
+                else weekdayDays++;
+            }
+        
+            const totalDuties = days * dutyPerDay;
+            const totalWeekendDuties = weekendDays * dutyPerDay;
+            const totalWeekdayDuties = weekdayDays * dutyPerDay;
+        
+            let preplannedWeekendDuties = 0;
+            let preplannedWeekdayDuties = 0;
+            persons.forEach(person => {
+                if (person.weekendDuties !== undefined) preplannedWeekendDuties += person.weekendDuties;
+                if (person.weekdayDuties !== undefined) preplannedWeekdayDuties += person.weekdayDuties;
+            });
+        
+            const adjustedTotalDuties = totalDuties - (preplannedWeekendDuties + preplannedWeekdayDuties);
+            const adjustedWeekendDuties = totalWeekendDuties - preplannedWeekendDuties;
+            const adjustedWeekdayDuties = totalWeekdayDuties - preplannedWeekdayDuties;
+        
+            const notTogetherEnabled = document.getElementById('notTogetherCheckbox').checked;
+        
+            // -Grup’ları analiz et
+            let notTogetherGroups = {};
+            let ungroupedPersons = [];
+            let preplannedPersons = [];
+            let totalGroupMembers = 0;
+            if (notTogetherEnabled) {
+                persons.forEach((person, index) => {
+                    if (person.weekdayDuties !== undefined || person.weekendDuties !== undefined) {
+                        preplannedPersons.push(index);
+                    } else {
+                        const groupId = person.notTogetherGroup || 0;
+                        if (groupId > 0) {
+                            if (!notTogetherGroups[groupId]) {
+                                notTogetherGroups[groupId] = [];
                             }
-                        }
-                    });
-                } else {
-                    persons.forEach((person, index) => {
-                        if (person.weekdayDuties !== undefined || person.weekendDuties !== undefined) {
-                            preplannedPersons.push(index);
+                            notTogetherGroups[groupId].push(index);
+                            totalGroupMembers++;
                         } else {
                             ungroupedPersons.push(index);
                         }
-                    });
-                }
-            
-                // Nöbet sayılarını dağıt
-                let remainingDuties = adjustedTotalDuties;
-                let remainingWeekendDuties = adjustedWeekendDuties;
-                let remainingWeekdayDuties = adjustedWeekdayDuties;
-                let remainingPersons = persons.length - preplannedPersons.length;
-            
-                let personDutyAssignments = persons.map(person => ({
-                    person,
-                    totalDuties: (person.weekdayDuties || 0) + (person.weekendDuties || 0),
-                    weekendDuties: person.weekendDuties || 0,
-                    weekdayDuties: person.weekdayDuties || 0
-                }));
-            
-                // -Grup’lara nöbet dağıt
+                    }
+                });
+            } else {
+                persons.forEach((person, index) => {
+                    if (person.weekdayDuties !== undefined || person.weekendDuties !== undefined) {
+                        preplannedPersons.push(index);
+                    } else {
+                        ungroupedPersons.push(index);
+                    }
+                });
+            }
+        
+            // Nöbet sayılarını dağıt
+            let remainingDuties = adjustedTotalDuties;
+            let remainingWeekendDuties = adjustedWeekendDuties;
+            let remainingWeekdayDuties = adjustedWeekdayDuties;
+        
+            let personDutyAssignments = persons.map(person => ({
+                person,
+                totalDuties: (person.weekdayDuties || 0) + (person.weekendDuties || 0),
+                weekendDuties: person.weekendDuties || 0,
+                weekdayDuties: person.weekdayDuties || 0
+            }));
+        
+            // -Grup’lara nöbet dağıt
+            if (notTogetherEnabled && totalGroupMembers > 0) {
                 for (const groupId in notTogetherGroups) {
                     const groupMembers = notTogetherGroups[groupId];
                     const groupSize = groupMembers.length;
-            
+        
                     if (groupSize < 2) {
                         M.toast({ html: `${groupId}. -grup tek kişi içeriyor, en az iki kişi olmalı!` });
                         return;
                     }
-            
-                    // Grup için adil nöbet sayısı
-                    const groupDuties = Math.floor((groupSize / remainingPersons) * remainingDuties);
-                    const groupWeekdayDuties = Math.floor((groupSize / remainingPersons) * remainingWeekdayDuties);
-                    const groupWeekendDuties = Math.floor((groupSize / remainingPersons) * remainingWeekendDuties);
-            
+        
+                    // Grup için nöbet sayısı, grup büyüklüğüne oranla
+                    const groupDutyRatio = groupSize / (totalGroupMembers + ungroupedPersons.length);
+                    const groupDuties = Math.round(adjustedTotalDuties * groupDutyRatio);
+                    const groupWeekdayDuties = Math.round(adjustedWeekdayDuties * groupDutyRatio);
+                    const groupWeekendDuties = Math.round(adjustedWeekendDuties * groupDutyRatio);
+        
                     // Grup üyelerine nöbetleri adaletli dağıt
                     const shuffledMembers = shuffleArray([...groupMembers]);
                     const avgDutiesPerPerson = groupSize ? Math.floor(groupDuties / groupSize) : 0;
                     const extraTotalDuties = groupSize ? groupDuties % groupSize : 0;
                     const avgWeekendPerPerson = groupSize ? Math.floor(groupWeekendDuties / groupSize) : 0;
                     const extraWeekendDuties = groupSize ? groupWeekendDuties % groupSize : 0;
-            
+        
                     shuffledMembers.forEach((personIndex, index) => {
                         const totalDuties = avgDutiesPerPerson + (index < extraTotalDuties ? 1 : 0);
                         const weekendDuties = avgWeekendPerPerson + (index < extraWeekendDuties ? 1 : 0);
                         const weekdayDuties = totalDuties - weekendDuties;
-            
+        
                         personDutyAssignments[personIndex].totalDuties = totalDuties;
                         personDutyAssignments[personIndex].weekendDuties = weekendDuties;
                         personDutyAssignments[personIndex].weekdayDuties = weekdayDuties;
-            
+        
                         remainingDuties -= totalDuties;
                         remainingWeekendDuties -= weekendDuties;
                         remainingWeekdayDuties -= weekdayDuties;
-                        remainingPersons--;
                     });
                 }
-            
-                // Kalan nöbetleri grupsuz kişilere dağıt
-                if (ungroupedPersons.length > 0) {
-                    const shuffledUnplanned = shuffleArray([...ungroupedPersons]);
-                    const avgDutiesPerPerson = remainingPersons ? Math.floor(remainingDuties / remainingPersons) : 0;
-                    const extraTotalDuties = remainingPersons ? remainingDuties % remainingPersons : 0;
-                    const avgWeekendPerPerson = remainingPersons ? Math.floor(remainingWeekendDuties / remainingPersons) : 0;
-                    const extraWeekendDuties = remainingPersons ? remainingWeekendDuties % remainingPersons : 0;
-            
-                    shuffledUnplanned.forEach((personIndex, index) => {
-                        const totalDuties = avgDutiesPerPerson + (index < extraTotalDuties ? 1 : 0);
-                        const weekendDuties = avgWeekendPerPerson + (index < extraWeekendDuties ? 1 : 0);
-                        const weekdayDuties = totalDuties - weekendDuties;
-            
-                        personDutyAssignments[personIndex].totalDuties = totalDuties;
-                        personDutyAssignments[personIndex].weekendDuties = weekendDuties;
-                        personDutyAssignments[personIndex].weekdayDuties = weekdayDuties;
-                    });
-                }
-            
-                // Atamaları orijinal kişilere uygula
-                personDutyAssignments.forEach(assignment => {
-                    const originalPerson = persons.find(p => p.name === assignment.person.name);
-                    originalPerson.weekdayDuties = assignment.weekdayDuties;
-                    originalPerson.weekendDuties = assignment.weekendDuties;
+            }
+        
+            // Kalan nöbetleri grupsuz kişilere dağıt
+            if (ungroupedPersons.length > 0) {
+                const shuffledUnplanned = shuffleArray([...ungroupedPersons]);
+                const avgDutiesPerPerson = ungroupedPersons.length ? Math.floor(remainingDuties / ungroupedPersons.length) : 0;
+                const extraTotalDuties = ungroupedPersons.length ? remainingDuties % ungroupedPersons.length : 0;
+                const avgWeekendPerPerson = ungroupedPersons.length ? Math.floor(remainingWeekendDuties / ungroupedPersons.length) : 0;
+                const extraWeekendDuties = ungroupedPersons.length ? remainingWeekendDuties % ungroupedPersons.length : 0;
+        
+                shuffledUnplanned.forEach((personIndex, index) => {
+                    const totalDuties = avgDutiesPerPerson + (index < extraTotalDuties ? 1 : 0);
+                    const weekendDuties = avgWeekendPerPerson + (index < extraWeekendDuties ? 1 : 0);
+                    const weekdayDuties = totalDuties - weekendDuties;
+        
+                    personDutyAssignments[personIndex].totalDuties = totalDuties;
+                    personDutyAssignments[personIndex].weekendDuties = weekendDuties;
+                    personDutyAssignments[personIndex].weekdayDuties = weekdayDuties;
                 });
-            
-                renderTable();
-            
-                let html = '<tr><th class="name-column">İsim</th>';
-                const displayDates = [];
-                for (let i = 0; i < days; i++) {
-                    const date = new Date(start);
-                    date.setDate(date.getDate() + i);
-                    displayDates.push(date);
-                    html += `<th>${date.getDate()}</th>`;
-                }
+            }
+        
+            // Atamaları orijinal kişilere uygula
+            personDutyAssignments.forEach(assignment => {
+                const originalPerson = persons.find(p => p.name === assignment.person.name);
+                originalPerson.weekdayDuties = assignment.weekdayDuties;
+                originalPerson.weekendDuties = assignment.weekendDuties;
+            });
+        
+            renderTable();
+        
+            let html = '<tr><th class="name-column">İsim</th>';
+            const displayDates = [];
+            for (let i = 0; i < days; i++) {
+                const date = new Date(start);
+                date.setDate(date.getDate() + i);
+                displayDates.push(date);
+                html += `<th>${date.getDate()}</th>`;
+            }
+            html += '</tr>';
+        
+            persons.forEach((person, pIndex) => {
+                html += `<tr><td class="name-column">${person.name></td>`;
+                dates.forEach((dateObj, dIndex) => {
+                    const isWeekend = dateObj.isWeekend;
+                    const cellKey = `${pIndex}-${dIndex}`;
+                    const isUnavailable = unavailableCells[cellKey];
+                    const isSelected = selectedCells[cellKey];
+        
+                    html += `
+                        <td class="calendar-cell 
+                            ${isWeekend ? 'holiday' : ''} 
+                            ${isUnavailable ? 'unavailable' : ''} 
+                            ${isSelected ? 'selected' : ''}"
+                            data-pindex="${pIndex}" 
+                            data-dindex="${dIndex}">
+                        </td>`;
+                });
                 html += '</tr>';
-            
-                persons.forEach((person, pIndex) => {
-                    html += `<tr><td class="name-column">${person.name}</td>`;
-                    dates.forEach((dateObj, dIndex) => {
-                        const isWeekend = dateObj.isWeekend;
-                        const cellKey = `${pIndex}-${dIndex}`;
-                        const isUnavailable = unavailableCells[cellKey];
-                        const isSelected = selectedCells[cellKey];
-            
-                        html += `
-                            <td class="calendar-cell 
-                                ${isWeekend ? 'holiday' : ''} 
-                                ${isUnavailable ? 'unavailable' : ''} 
-                                ${isSelected ? 'selected' : ''}"
-                                data-pindex="${pIndex}" 
-                                data-dindex="${dIndex}">
-                            </td>`;
-                    });
-                    html += '</tr>';
+            });
+        
+            document.getElementById('calendarTable').innerHTML = html;
+        
+            const cells = document.querySelectorAll('.calendar-cell');
+            const isMobile = isMobileDevice();
+        
+            cells.forEach(cell => {
+                if (!isMobile) {
+                    cell.addEventListener('mousedown', startDragging);
+                    cell.addEventListener('mousemove', dragOver);
+                    cell.addEventListener('mouseup', stopDragging);
+                    cell.addEventListener('touchstart', startDragging, { passive: false });
+                    cell.addEventListener('touchmove', dragOver, { passive: false });
+                    cell.addEventListener('touchend', stopDragging);
+                }
+        
+                cell.addEventListener('click', () => {
+                    const pIndex = parseInt(cell.dataset.pindex);
+                    const dIndex = parseInt(cell.dataset.dindex);
+                    handleCellClick(pIndex, dIndex);
                 });
-            
-                document.getElementById('calendarTable').innerHTML = html;
-            
-                const cells = document.querySelectorAll('.calendar-cell');
-                const isMobile = isMobileDevice();
-            
-                cells.forEach(cell => {
-                    if (!isMobile) {
-                        cell.addEventListener('mousedown', startDragging);
-                        cell.addEventListener('mousemove', dragOver);
-                        cell.addEventListener('mouseup', stopDragging);
-                        cell.addEventListener('touchstart', startDragging, { passive: false });
-                        cell.addEventListener('touchmove', dragOver, { passive: false });
-                        cell.addEventListener('touchend', stopDragging);
-                    }
-            
-                    cell.addEventListener('click', () => {
+        
+                if (isMobile) {
+                    cell.addEventListener('touchend', (event) => {
+                        event.preventDefault();
                         const pIndex = parseInt(cell.dataset.pindex);
                         const dIndex = parseInt(cell.dataset.dindex);
                         handleCellClick(pIndex, dIndex);
-                    });
-            
-                    if (isMobile) {
-                        cell.addEventListener('touchend', (event) => {
-                            event.preventDefault();
-                            const pIndex = parseInt(cell.dataset.pindex);
-                            const dIndex = parseInt(cell.dataset.dindex);
-                            handleCellClick(pIndex, dIndex);
-                        }, { passive: false });
-                    }
-                });
-            
-                if (collapsibleCalendar) collapsibleCalendar.open(0);
-                showCustomAlert();
-                addGlowEffect();
-                updateStatistics();
-            }
+                    }, { passive: false });
+                }
+            });
+        
+            if (collapsibleCalendar) collapsibleCalendar.open(0);
+            showCustomAlert();
+            addGlowEffect();
+            updateStatistics();
+        }
 
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -2812,6 +2829,14 @@
         document.getElementById('loadingOverlay').style.display = 'none';
         showToast('Sunucuyla bağlantı kurulamadı: ' + error.message, 10000); // Hata mesajı, 10 saniye
     });
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
 
         function updateCalendar() {
