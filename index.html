@@ -473,18 +473,23 @@
         }
     
         .switch-container {
-           background-color: rgba(119,190,186,255) !important;
-           border: 2px solid #b0bec5;
-           padding: 6px 10px; 
-           border-radius: 8px;
-           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-           display: flex;
-           flex-direction: column; 
-           align-items: flex-start; 
-           height: auto; 
-           justify-content: center;
+            background-color: rgba(119,190,186,255) !important;
+            border: 2px solid #b0bec5;
+            padding: 6px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: inline-flex; /* Flex yerine inline-flex */
+            flex-direction: column;
+            align-items: flex-start;
+            width: auto; /* Genişlik içeriğe göre */
+            box-sizing: border-box;
         }
 
+        .switch-container label {
+            width: auto;
+            white-space: nowrap;
+        }
+       
         balance-label {
             display: flex;
             align-items: center;
@@ -720,6 +725,15 @@
         .glow {
             animation: glow 4s ease-in-out infinite;
         }
+
+        .waves-effect.waves-light.btn.teal {
+            width: auto;
+            min-width: 0;
+            padding: 0 8px; /* Padding'i küçülttük */
+            box-sizing: border-box;
+            display: inline-flex; /* İkon ve metni hizalamak için */
+            align-items: center;
+        }
         
         @keyframes glow {
             0% {
@@ -749,7 +763,11 @@
             animation: bounce 1s infinite;
         }
 
-
+        @media only screen and (max-width: 600px) {
+            .control-buttons .btn {
+                font-size: 0.8rem;
+            }
+        }
 
         /* Mobil Stiller */
         @media only screen and (max-width: 900px) {
@@ -922,12 +940,12 @@
                             <li><a class="btn-floating tiny waves-effect waves-light teal"><i class="material-icons">add</i></a> simgesine tıklayarak listeye personel ekleyebilirsiniz.</li>
                             <li>Birlikte nöbet tutmak isteyen/ tutması gereken personeller varsa aynı gruba ekleyerek aynı güne nöbetçi atanmalarını sağlayabilirsiniz</li>
                             <li><a class="btn-floating tiny waves-effect waves-light grey"><i class="material-icons">more_vert</i></a>tuşu ile oluşturduğunuz personel listesini indirebilir, sonraki kullanımlarda yükleyerek süreci hızlandırabilirsiniz.</li>
-                            <li>Nöbet sayılarını "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbet dağıt ve Takvim oluştur" tuşu ile otomatik dağıtabilir veya kendiniz dağıtabilirsiniz.</li>
+                            <li>Nöbet sayıları "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbetleri Adaletli Dağıt" tuşu ile otomatik dağıtılır, kendiniz de düzenleyebilirsiniz.</li>
                             <li>Kişilere ayrı ayrı hafta içi / hafta sonu nöbet sayıları belirleyebilirsiniz.</li>
                             <li>İki nöbet arası en az boşluk toplu veya kişiye özel olabilir.</li>
-                            <li>Personel planı bittiğinde "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbet dağıt ve Takvim oluştur" tuşuna basınız.</li>
-                            <li>Cuma ve Perşembe günlerini dengelemek isterseniz ilgili kutucukları tikleyiniz.</li>
+                            <li>Personel planı bittiğinde "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbetleri Adaleti Dağıt" tuşuna basınız. Takvimin oluşturulduğunu göreceksiniz.</li>
                             <li>Varsa <font color="red">istenmeyen ✖</font>/<font color="green">istenen ✓</font> günleri takvim üzerinde işaretleyerek "<a class="btn-floating tiny waves-effect waves-light purple"><i class="material-icons">auto_fix_high</i></a>Otomatik Ata" tuşuna basınız.</li>
+                            <li>Cuma ve Perşembe günlerini dengelemek isterseniz ilgili kutucukları tikleyiniz.</li>
                             <li>Geri al tuşu ile takvimdeki son değişikliği geri alabilirsiniz. Temizle butonu takvimi sıfırlar.</li>
                             <li>Listeyi excel formatında indirmek için "<a class="btn-floating tiny waves-effect waves-light green"><i class="material-icons">file_download</i></a>İndir" tuşuna basınız.</li>
                         </ul>
@@ -1008,6 +1026,13 @@
                                     <span>Birlikte nöbet tutması gerekenler var mı?</span>
                                 </label>
                             </div>
+                             <!-- notTogether Checkbox-->
+                            <div id="notTogetherSwitch" class="grouping-container" style="margin-bottom: 15px;">
+                                <label class="grouping-label tooltipped" data-position="top" data-tooltip="Aynı kıdemdeki, aynı bölümdeki kişileri sol taraftan aynı gruba eklemeniz yeterli">
+                                    <input id="notTogetherCheckbox" type="checkbox" onchange="toggleNotTogether()" />
+                                    <span>Aynı nöbette BULUNMAMASI gerekenler var mı?</span>
+                                </label>
+                            </div>
                             <!-- "No Personel" -->
                             <div id="noPersonnelMessage" class="no-personnel-message" style="display: block;">
                                 Henüz Personel Eklenmedi
@@ -1019,7 +1044,7 @@
                             <div class="row control-buttons">
                                 <div class="col s12">
                                     <button class="btn waves-effect waves-light blue" onclick="generateCalendar()">
-                                        <i class="material-icons left">event</i>Nöbet Dağıt ve Takvim Oluştur
+                                        <i class="material-icons left">event</i>Nöbetleri Adaletli Dağıt
                                     </button>
                                     <button class="btn waves-effect waves-light grey darken-3" onclick="resetDuties()">
                                         <i class="material-icons left">refresh</i>Dağıtımı Sıfırla
@@ -1104,10 +1129,9 @@
                             </div>
                             
                             <!-- İndir -->
-                            <div class="col s3">
+                              <div class="col s3">
                                 <button class="waves-effect waves-light btn teal tooltipped" 
                                     onclick="downloadSchedule()" 
-                                    style="min-width: 180px; white-space: nowrap; padding: 0 10px;" 
                                     data-position="bottom" 
                                     data-tooltip="Nöbet listesini Excel formatında indirir">
                                     <i class="material-icons left">file_download</i>İndir
@@ -1474,22 +1498,27 @@
         }
 
         function addPerson() {
-            const name = document.getElementById('personName').value.trim().toUpperCase();
-            if (!name) return M.toast({html: 'Lütfen isim girin!'});
-            if (persons.some(p => p.name === name)) return M.toast({html: 'Bu isim zaten var!'});
-
+            const personNameInput = document.getElementById('personName');
+            const name = personNameInput.value.trim().toUpperCase();
+            if (!name) {
+                M.toast({ html: 'Lütfen bir isim girin!' });
+                return;
+            }
+            if (persons.some(p => p.name === name)) {
+                M.toast({ html: 'Bu isim zaten eklenmiş!' });
+                return;
+            }
             persons.push({
                 name: name,
                 weekdayDuties: undefined,
                 weekendDuties: undefined,
                 minDaysBetween: 1,
-                group: 0
+                group: 0,
+                notTogetherGroup: 0
             });
-
-            document.getElementById('personName').value = '';
+            personNameInput.value = '';
             renderTable();
-            if (collapsiblePersonel) collapsiblePersonel.open(0);
-            M.toast({html: `${name} eklendi!`});
+            M.updateTextFields();
         }
 
         function deletePerson(index) {
@@ -1530,27 +1559,33 @@
             const tableContainer = document.getElementById('personnelTableContainer');
             const noPersonnelMessage = document.getElementById('noPersonnelMessage');
             const groupingSwitch = document.getElementById('groupingSwitch');
+            const notTogetherSwitch = document.getElementById('notTogetherSwitch');
             const groupingEnabled = document.getElementById('groupingCheckbox').checked;
+            const notTogetherEnabled = document.getElementById('notTogetherCheckbox').checked;
             const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value.trim()) || 0;
-
+        
             if (dutyPerDay >= 2) {
                 groupingSwitch.style.display = 'block';
+                notTogetherSwitch.style.display = 'block';
             } else {
                 groupingSwitch.style.display = 'none';
+                notTogetherSwitch.style.display = 'none';
                 document.getElementById('groupingCheckbox').checked = false;
+                document.getElementById('notTogetherCheckbox').checked = false;
             }
-
+        
             if (persons.length === 0) {
                 tableContainer.style.display = 'none';
                 noPersonnelMessage.style.display = 'block';
             } else {
                 tableContainer.style.display = 'table';
                 noPersonnelMessage.style.display = 'none';
-
+        
                 let html = `
                     <thead>
                         <tr>
-                            ${groupingEnabled ? '<th>Grup</th>' : ''}
+                            ${groupingEnabled ? '<th class="tooltipped" data-position="top" data-tooltip="Aynı nöbette bulunmak isteyenleri gruplayın">+ Grup</th>' : ''}
+                            ${notTogetherEnabled ? '<th class="tooltipped" data-position="top" data-tooltip="Aynı gün nöbet tutmaması gerekenleri gruplayın">- Grup</th>' : ''}
                             <th>İsim</th>
                             <th>Hafta İçi</th>
                             <th>Hf Sonu</th>
@@ -1568,23 +1603,32 @@
                     </thead>
                     <tbody id="personTable">
                 `;
-
+        
                 const groupCount = Math.ceil(persons.length / 2);
                 console.log('Group Count:', groupCount);
-
+        
                 persons.forEach((person, index) => {
                     let groupOptions = '<option value="0">Seç</option>';
+                    let notTogetherOptions = '<option value="0">Seç</option>';
                     for (let i = 1; i <= groupCount; i++) {
                         groupOptions += `<option value="${i}" ${person.group === i ? 'selected' : ''}>${i}</option>`;
+                        notTogetherOptions += `<option value="${i}" ${person.notTogetherGroup === i ? 'selected' : ''}>${i}</option>`;
                     }
                     console.log('Group Options for', person.name, ':', groupOptions);
-
+        
                     html += `
                         <tr style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; background-color: #f9fafb; transition: background-color 0.2s;">
                             ${groupingEnabled && groupCount > 0 ? `
                                 <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
                                     <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px; width: 60px; display: block;" onchange="updateGroup(${index}, this.value)">
                                         ${groupOptions}
+                                    </select>
+                                </td>
+                            ` : ''}
+                            ${notTogetherEnabled && groupCount > 0 ? `
+                                <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
+                                    <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px; width: 60px; display: block;" onchange="updateNotTogetherGroup(${index}, this.value)">
+                                        ${notTogetherOptions}
                                     </select>
                                 </td>
                             ` : ''}
@@ -1623,10 +1667,10 @@
                         </tr>
                     `;
                 });
-
+        
                 html += `</tbody>`;
                 tableContainer.innerHTML = html;
-
+        
                 const selects = tableContainer.querySelectorAll('select');
                 selects.forEach(select => {
                     select.style.display = 'block';
@@ -1635,6 +1679,8 @@
                         select.M_FormSelect.destroy();
                     }
                 });
+        
+                M.Tooltip.init(document.querySelectorAll('.tooltipped'), {});
             }
         }
 
@@ -1644,6 +1690,18 @@
 
         function updateGroup(index, value) {
             persons[index].group = parseInt(value);
+            renderTable();
+        }
+
+        function toggleNotTogether() {
+            renderTable();
+        }
+        
+        function updateNotTogetherGroup(index, value) {
+            persons[index].notTogetherGroup = parseInt(value);
+            if (persons[index].group !== 0 && persons[index].notTogetherGroup !== 0) {
+                M.toast({ html: `${persons[index].name} hem birlikte nöbet tutma hem de aynı nöbette olmama grubuna eklenemez!` });
+            }
             renderTable();
         }
 
@@ -1694,7 +1752,7 @@
         
             // Mobil ve masaüstü için konumlandırma
             if (isMobileDevice()) {
-                alertDiv.style.top = '20px';
+                alertDiv.style.top = '35%';
                 alertDiv.style.left = '50%';
                 alertDiv.style.transform = 'translateX(-50%)';
                 if (window.innerWidth < 360) {
@@ -1781,6 +1839,12 @@
 
 
         function generateCalendar() {
+
+            if (persons.length < 3) {
+                M.toast({ html: 'Lütfen en az 3 personel ekleyin!' });
+                return;
+            }
+            
             const startInput = document.getElementById('startDate').value;
             const endInput = document.getElementById('endDate').value;
             const dutyPerDayInput = document.getElementById('dutyPerDay').value.trim();
@@ -2357,6 +2421,30 @@
         }
 
         function downloadSchedule() {
+
+            // Takvim doluluk kontrolü
+                const startInput = document.getElementById('startDate').value;
+                const endInput = document.getElementById('endDate').value;
+                const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value) || 1;
+                const [startDay, startMonth, startYear] = startInput.split('-').map(Number);
+                const [endDay, endMonth, endYear] = endInput.split('-').map(Number);
+                const start = new Date(startYear, startMonth - 1, startDay);
+                const end = new Date(endYear, endMonth - 1, endDay);
+                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+            
+                let allDaysFilled = true;
+                for (let d = 0; d < days; d++) {
+                    const assigned = document.querySelectorAll(`td[data-dindex="${d}"].selected`).length;
+                    if (assigned < dutyPerDay) {
+                        allDaysFilled = false;
+                        break;
+                    }
+                }
+                if (!allDaysFilled) {
+                    M.toast({ html: 'Tüm günlere yeteri kadar nöbetçi atanmadı, takvimi doldurun!' });
+                    return;
+                }
+            
             performExport(function(blob, fileName) {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -2493,14 +2581,15 @@
                 return;
             }
 
-            const personnelDuties = persons.map(person => ({
+           const personnelDuties = persons.map(person => ({
                 name: person.name,
                 weekdayLeft: person.weekdayDuties || 0,
                 weekendLeft: person.weekendDuties || 0,
                 minDaysBetween: person.minDaysBetween,
                 dutyDays: [],
                 originalIndex: persons.findIndex(p => p.name === person.name),
-                group: person.group || 0
+                group: person.group || 0,
+                notTogetherGroup: person.notTogetherGroup || 0
             }));
 
             document.getElementById('loadingOverlay').style.display = 'flex';
@@ -2555,6 +2644,42 @@
                     });
                 }
             }
+
+            const notTogetherEnabled = document.getElementById('notTogetherCheckbox').checked;
+            if (notTogetherEnabled) {
+                const notTogetherGroupSizes = {};
+                persons.forEach(person => {
+                    if (person.notTogetherGroup > 0) {
+                        notTogetherGroupSizes[person.notTogetherGroup] = (notTogetherGroupSizes[person.notTogetherGroup] || 0) + 1;
+                    }
+                });
+            
+                for (const group in notTogetherGroupSizes) {
+                    if (notTogetherGroupSizes[group] > dutyPerDay) {
+                        validationErrors.push({
+                            type: 'error',
+                            message: `${group}. -grupta ${notTogetherGroupSizes[group]} kişi var, ancak nöbetçi sayısını ${dutyPerDay} seçtiniz!`
+                        });
+                    }
+                }
+            
+                const hasAnyNotTogetherGroup = persons.some(person => person.notTogetherGroup > 0);
+                if (!hasAnyNotTogetherGroup) {
+                    validationErrors.push({
+                        type: 'error',
+                        message: '"Aynı nöbette bulunmaması gerekenler var mı?" seçili, ancak hiç -grup atanmamış!'
+                    });
+                }
+            
+                persons.forEach(person => {
+                    if (person.group > 0 && person.notTogetherGroup > 0) {
+                        validationErrors.push({
+                            type: 'error',
+                            message: `${person.name} hem birlikte nöbet tutma hem de aynı nöbette olmama grubuna eklenemez!`
+                        });
+                    }
+                });
+            }
             
             // Hata varsa modal aç ve işlemi durdur
             if (validationErrors.length > 0) {
@@ -2564,17 +2689,18 @@
             }
 
             const data = {
-               personnel: personnelDuties,
-               totalDays: days,
-               weekendDays: dates.map(d => d.isWeekend ? d.index : null).filter(d => d !== null),
-               fridayDays: dates.map(d => d.isFriday ? d.index : null).filter(d => d !== null),
-               thursdayDays: dates.map(d => d.isThursday ? d.index : null).filter(d => d !== null),
-               unavailableCells: unavailableCells || {},
-               preAssignedDays: preAssignedDays,
-               maxConsecutiveDuties: 1,
-               dutyPerDay: dutyPerDay,
-               balanceFridays: balanceFridays,
-               balanceThursdays: balanceThursdays
+                personnel: personnelDuties,
+                totalDays: days,
+                weekendDays: dates.map(d => d.isWeekend ? d.index : null).filter(d => d !== null),
+                fridayDays: dates.map(d => d.isFriday ? d.index : null).filter(d => d !== null),
+                thursdayDays: dates.map(d => d.isThursday ? d.index : null).filter(d => d !== null),
+                unavailableCells: unavailableCells || {},
+                preAssignedDays: preAssignedDays,
+                maxConsecutiveDuties: 1,
+                dutyPerDay: dutyPerDay,
+                balanceFridays: balanceFridays,
+                balanceThursdays: balanceThursdays,
+                notTogetherGroups: notTogetherEnabled ? personnelDuties.map(p => p.notTogetherGroup) : []
             };
 
             saveToHistory();
@@ -2672,17 +2798,19 @@
 
                 const newPersons = [];
                 for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (row[0]) {
-                        const name = row[0].replace(/"/g, '').trim().toUpperCase();
-                        newPersons.push({
-                            name: name,
-                            weekdayDuties: row[1] ? parseInt(row[1]) : undefined,
-                            weekendDuties: row[2] ? parseInt(row[2]) : undefined,
-                            minDaysBetween: row[3] ? parseInt(row[3]) : 1
-                        });
-                    }
+                const row = rows[i];
+                if (row[0]) {
+                    const name = row[0].replace(/"/g, '').trim().toUpperCase();
+                    newPersons.push({
+                        name: name,
+                        weekdayDuties: row[1] ? parseInt(row[1]) : undefined,
+                        weekendDuties: row[2] ? parseInt(row[2]) : undefined,
+                        minDaysBetween: row[3] ? parseInt(row[3]) : 1,
+                        group: row[4] ? parseInt(row[4]) : 0,
+                        notTogetherGroup: row[5] ? parseInt(row[5]) : 0
+                    });
                 }
+            }
 
                 persons = newPersons.filter(p => p.name && !persons.some(existing => existing.name === p.name));
                 renderTable();
@@ -2706,19 +2834,21 @@
 
         function downloadPersonnel() {
             const csvRows = [];
-            const headers = ['İsim', 'Hafta İçi', 'Hafta Sonu', 'Nöbet Ertesi Boşluk'];
+            const headers = ['İsim', 'Hafta İçi', 'Hafta Sonu', 'Nöbet Ertesi Boşluk', 'Grup', '-Grup'];
             csvRows.push(headers.join(','));
-
+        
             persons.forEach(person => {
                 const row = [
                     `"${person.name}"`,
                     person.weekdayDuties !== undefined ? person.weekdayDuties : '',
                     person.weekendDuties !== undefined ? person.weekendDuties : '',
-                    person.minDaysBetween
+                    person.minDaysBetween,
+                    person.group || 0,
+                    person.notTogetherGroup || 0
                 ];
                 csvRows.push(row.join(','));
             });
-
+        
             const csvContent = csvRows.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -2741,9 +2871,15 @@
         }
     </script>
     
-    <footer class="fixed-footer">
+       <footer class="fixed-footer">
         <div class="footer-content">
             © 2025 - nobetplani.com - CK
+            <a href="mailto:nobetplani@gmail.com" style="margin-left: 10px;">
+                <img src="gmail-logo.png" style="width: 24px; height: 24px; vertical-align: middle;">
+            </a>
+            <a href="https://www.instagram.com/nobetplani" target="_blank" style="margin-left: 10px;">
+                <img src="instagram-logo.png" style="width: 24px; height: 24px; vertical-align: middle;">
+            </a>
         </div>
     </footer>
 
