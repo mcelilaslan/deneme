@@ -789,6 +789,36 @@
 
         /* Mobil Stiller */
         @media only screen and (max-width: 900px) {
+            
+            #personelCollapsible .btn-floating {
+             width: 36px !important;
+             height: 36px !important;
+             line-height: 36px !important;
+             display: flex !important;
+             align-items: center !important;
+             justify-content: center !important;
+             overflow: hidden !important; /* Taşma önleme */
+           }
+         
+           /* Buton içindeki material-icons için */
+           #personelCollapsible .btn-floating i.material-icons {
+             font-size: 20px !important; /* İkon boyutunu küçült */
+             line-height: 36px !important; /* Buton yüksekliğiyle eşitle */
+             margin: 0 !important; /* Ekstra boşlukları sıfırla */
+             display: flex !important;
+             align-items: center !important;
+             justify-content: center !important;
+             width: 100% !important;
+             height: 100% !important;
+           }
+         
+           /* + ve üç nokta butonları için özel hizlama */
+           #personelCollapsible .btn-floating.teal i.material-icons,
+           #personelCollapsible .btn-floating.grey i.material-icons {
+             transform: translateY(0) !important; /* Yukarı kayma varsa düzelt */
+           }
+
+
             .custom-container {
                 max-width: 100%;
                 padding: 10px;
