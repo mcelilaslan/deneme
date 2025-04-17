@@ -25,6 +25,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.emailjs.com/sdk/2.3.2/email.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
    <style>
         body {
@@ -737,25 +738,45 @@
             align-items: center;
         }
 
-         .team-cell {
-             min-width: 80px;
-             max-width: 100px;
-             text-align: center;
-             padding: 0 8px !important;
-         }
-         
-         .team-cell select {
-             display: block !important;
-             height: 32px;
-             font-size: 14px;
-             border: 1px solid #d1d5db;
-             border-radius: 6px;
-             background-color: #ffffff;
-             color: #374151;
-             padding: 4px;
-             width: 100%;
-             box-sizing: border-box;
-         }
+         #feedbackModal {
+          max-width: 500px;
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.97);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      
+      #feedbackModal .modal-content {
+          padding: 20px;
+      }
+      
+      #feedbackModal .modal-footer {
+          padding: 10px 20px;
+          background: #f5f5f5;
+          border-radius: 0 0 8px 8px;
+      }
+      
+      #feedbackModal .input-field label {
+          color: #26a69a;
+      }
+      
+      #feedbackModal .input-field input:focus + label,
+      #feedbackModal .input-field textarea:focus + label {
+          color: #26a69a !important;
+      }
+      
+      #feedbackModal .input-field input:focus,
+      #feedbackModal .input-field textarea:focus {
+          border-bottom: 1px solid #26a69a !important;
+          box-shadow: 0 1px 0 0 #26a69a !important;
+      }
+      
+      #feedbackModal .btn.teal {
+          transition: transform 0.3s ease;
+      }
+      
+      #feedbackModal .btn.teal:hover {
+          transform: scale(1.1);
+      }
 
          @keyframes shake {
           0%, 100% {
@@ -990,24 +1011,17 @@
                 padding-left: 10px;
             }
 
-            .team-cell {
-                 min-width: 60px;
-                 max-width: 80px;
-                 padding: 0 4px !important;
-             }
-         
-             .team-cell select {
-                 height: 28px;
-                 font-size: 12px;
-                 padding: 2px;
-             }
-         
-             #teamsSwitch {
-                 margin-left: 0;
-                 width: 100%;
-                 justify-content: flex-start;
-                 padding-left: 10px;
-             }
+            #feedbackModal {
+              max-width: 90%;
+          }
+      
+          #feedbackModal .modal-content {
+              padding: 15px;
+          }
+      
+          #feedbackModal .modal-footer {
+              padding: 8px 15px;
+          }
     
             .standalone-select-wrapper {
                 text-align: left !important;
@@ -1275,6 +1289,32 @@
             <a href="#!" class="modal-close waves-effect waves-green btn-flat" onclick="confirmSend()">Devam Et</a>
         </div>
     </div>
+
+      <!-- Geri Bildirim Modalı -->
+      <div id="feedbackModal" class="modal">
+          <div class="modal-content">
+              <h4>Geri Bildirim Gönder</h4>
+              <p>Bize görüşlerinizi iletebilirsiniz!</p>
+              <form id="feedbackForm">
+                  <div class="input-field">
+                      <input id="feedbackName" type="text" class="validate" required>
+                      <label for="feedbackName">Adınız</label>
+                  </div>
+                  <div class="input-field">
+                      <input id="feedbackEmail" type="email" class="validate">
+                      <label for="feedbackEmail">E-posta Adresiniz (Opsiyonel)</label>
+                  </div>
+                  <div class="input-field">
+                      <textarea id="feedbackMessage" class="materialize-textarea" required></textarea>
+                      <label for="feedbackMessage">Mesajınız</label>
+                  </div>
+              </form>
+          </div>
+          <div class="modal-footer">
+              <a href="#!" class="modal-close waves-effect waves-red btn-flat">İptal</a>
+              <a href="#!" class="waves-effect waves-green btn teal" onclick="sendFeedback()">Gönder</a>
+          </div>
+      </div>
 
     <!-- Yükleme Ekranı -->
     <div id="loadingOverlay" class="loading-overlay">
@@ -3030,19 +3070,65 @@
             updateStatistics();
             M.toast({ html: 'Takvimdeki tüm işaretlemeler temizlendi!' });
         }
+
+               // EmailJS başlatma
+      document.addEventListener('DOMContentLoaded', function() {
+          emailjs.init('YOUR_USER_ID'); // EmailJS User ID'nizi buraya ekleyin
+      
+          // Modal başlatma
+          const modals = document.querySelectorAll('.modal');
+          M.Modal.init(modals);
+      });
+      
+      // Geri Bildirim Gönderme Fonksiyonu
+      function sendFeedback() {
+          const name = document.getElementById('feedbackName').value.trim();
+          const email = document.getElementById('feedbackEmail').value.trim();
+          const message = document.getElementById('feedbackMessage').value.trim();
+      
+          // Doğrulama
+          if (!name || !message) {
+              M.toast({ html: 'Lütfen adınızı ve mesajınızı doldurun!' });
+              return;
+          }
+      
+          // Yükleme ekranını göster
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          loadingOverlay.style.display = 'flex';
+      
+          // EmailJS ile mesaj gönderme
+          emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+              from_name: name,
+              from_email: email || 'Bilinmiyor',
+              message: message,
+              reply_to: email || 'nobetplani@gmail.com'
+          })
+          .then(() => {
+              loadingOverlay.style.display = 'none';
+              M.toast({ html: 'Geri bildiriminiz başarıyla gönderildi!' });
+              const modal = M.Modal.getInstance(document.getElementById('feedbackModal'));
+              modal.close();
+              document.getElementById('feedbackForm').reset();
+          })
+          .catch(error => {
+              loadingOverlay.style.display = 'none';
+              M.toast({ html: 'Mesaj gönderilirken bir hata oluştu: ' + error.message });
+          });
+      }
     </script>
     
        <footer class="fixed-footer">
-        <div class="footer-content">
-            © 2025 - nobetplani.com - CK
-            <a href="mailto:nobetplani@gmail.com" style="margin-left: 10px;">
-                <img src="gmail-logo.png" style="width: 24px; height: 24px; vertical-align: middle;">
-            </a>
-            <a href="https://www.instagram.com/nobetplani" target="_blank" style="margin-left: 10px;">
-                <img src="instagram-logo.png" style="width: 24px; height: 24px; vertical-align: middle;">
-            </a>
-        </div>
-    </footer>
+          <div class="footer-content">
+              © 2025 - nobetplani.com - CK
+              <a href="https://www.instagram.com/nobetplani" target="_blank" style="margin-left: 10px;">
+                  <img src="instagram-logo.png" style="width: 24px; height: 24px; vertical-align: middle;">
+              </a>
+              <a href="#feedbackModal" class="modal-trigger" style="margin-left: 10px; color: #fff; text-decoration: none;">
+                  <i class="material-icons" style="vertical-align: middle; font-size: 24px;">feedback</i>
+                  Geri Bildirim
+              </a>
+          </div>
+      </footer>
 
 
 </body>
