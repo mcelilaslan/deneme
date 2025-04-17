@@ -2982,51 +2982,44 @@
 
 
         
-         // EmailJS başlatma
-         document.addEventListener('DOMContentLoaded', function() {
-             emailjs.init({
-                 publicKey: 'er7AJzh0We5M1Z5kn' // EmailJS Public Key'iniz
-             });
-             const modals = document.querySelectorAll('.modal');
-             M.Modal.init(modals);
-         });
+         
          
          // Geri Bildirim Gönderme Fonksiyonu
          function sendFeedback() {
-    const name = document.getElementById('feedback_name').value.trim();
-    const email = document.getElementById('feedback_email').value.trim();
-    const message = document.getElementById('feedback_message').value.trim();
-    const submitButton = document.getElementById('feedback_submit');
-    const feedbackLoading = document.getElementById('feedbackLoading');
-
-    if (!name || !message) {
-        M.toast({ html: 'Lütfen adınızı ve mesajınızı doldurun!' });
-        return;
-    }
-
-    submitButton.classList.add('disabled');
-    feedbackLoading.style.display = 'block';
-
-    emailjs.send('nobet_plani', 'template_3nxu9rm', {
-        from_name: name,
-        from_email: email || 'Bilinmiyor',
-        message: message,
-        reply_to: email || 'nobetplani@gmail.com'
-    })
-    .then(() => {
-        M.toast({ html: 'Geri bildiriminiz başarıyla gönderildi!' });
-        document.getElementById('feedback_form').reset();
-        M.Modal.getInstance(document.getElementById('feedbackModal')).close();
-    })
-    .catch((error) => {
-        console.error('EmailJS Hatası:', error);
-        M.toast({ html: 'Mesaj gönderilirken bir hata oluştu. Detay: ' + error.text });
-    })
-    .finally(() => {
-        submitButton.classList.remove('disabled');
-        feedbackLoading.style.display = 'none';
-    });
-}
+             const name = document.getElementById('feedbackName').value.trim();
+             const email = document.getElementById('feedbackEmail').value.trim();
+             const message = document.getElementById('feedbackMessage').value.trim();
+             const submitButton = document.getElementById('feedback_submit');
+             const feedbackLoading = document.getElementById('feedbackLoading');
+         
+             if (!name || !message) {
+                 M.toast({ html: 'Lütfen adınızı ve mesajınızı doldurun!' });
+                 return;
+             }
+         
+             submitButton.classList.add('disabled');
+             feedbackLoading.style.display = 'block';
+         
+             emailjs.send('nobet_plani', 'template_3nxu9rm', {
+                 from_name: name,
+                 from_email: email || 'Bilinmiyor',
+                 message: message,
+                 reply_to: email || 'nobetplani@gmail.com'
+             })
+             .then(() => {
+                 M.toast({ html: 'Geri bildiriminiz başarıyla gönderildi!' });
+                 document.getElementById('feedbackForm').reset();
+                 M.Modal.getInstance(document.getElementById('feedbackModal')).close();
+             })
+             .catch((error) => {
+                 console.error('EmailJS Hatası:', error);
+                 M.toast({ html: 'Mesaj gönderilirken bir hata oluştu. Detay: ' + error.text });
+             })
+             .finally(() => {
+                 submitButton.classList.remove('disabled');
+                 feedbackLoading.style.display = 'none';
+             });
+         }
 
 
     </script>
