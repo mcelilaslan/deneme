@@ -3071,50 +3071,65 @@
             M.toast({ html: 'Takvimdeki tüm işaretlemeler temizlendi!' });
         }
 
-               // EmailJS başlatma
-      document.addEventListener('DOMContentLoaded', function() {
-          emailjs.init('YOUR_USER_ID'); // EmailJS User ID'nizi buraya ekleyin
-      
-          // Modal başlatma
-          const modals = document.querySelectorAll('.modal');
-          M.Modal.init(modals);
-      });
-      
-      // Geri Bildirim Gönderme Fonksiyonu
-      function sendFeedback() {
-          const name = document.getElementById('feedbackName').value.trim();
-          const email = document.getElementById('feedbackEmail').value.trim();
-          const message = document.getElementById('feedbackMessage').value.trim();
-      
-          // Doğrulama
-          if (!name || !message) {
-              M.toast({ html: 'Lütfen adınızı ve mesajınızı doldurun!' });
-              return;
-          }
-      
-          // Yükleme ekranını göster
-          const loadingOverlay = document.getElementById('loadingOverlay');
-          loadingOverlay.style.display = 'flex';
-      
-          // EmailJS ile mesaj gönderme
-          emailjs.send('nobet_plani', 'template_3nxu9rm', {
-              from_name: name,
-              from_email: email || 'Bilinmiyor',
-              message: message,
-              reply_to: email || 'nobetplani@gmail.com'
-          })
-          .then(() => {
-              loadingOverlay.style.display = 'none';
-              M.toast({ html: 'Geri bildiriminiz başarıyla gönderildi!' });
-              const modal = M.Modal.getInstance(document.getElementById('feedbackModal'));
-              modal.close();
-              document.getElementById('feedbackForm').reset();
-          })
-          .catch(error => {
-              loadingOverlay.style.display = 'none';
-              M.toast({ html: 'Mesaj gönderilirken bir hata oluştu: ' + error.message });
-          });
-      }
+              // EmailJS başlatma
+    document.addEventListener('DOMContentLoaded', function() {
+        emailjs.init('YOUR_USER_ID'); // EmailJS User ID'nizi buraya ekleyin
+        // Modal başlatma
+        const modals = document.querySelectorAll('.modal');
+        M.Modal.init(modals);
+    });
+
+    // Geri Bildirim Gönderme Fonksiyonu
+    function sendFeedback() {
+        const name = document.getElementById('feedbackName').value.trim();
+        const email = document.getElementById('feedbackEmail').value.trim();
+        const message = document.getElementById('feedbackMessage').value.trim();
+        const feedbackLoading = document.getElementById('feedbackLoading');
+        const sendButton = document.querySelector('#feedbackModal .btn.teal');
+
+        // Doğrulama
+        if (!name || !message) {
+            M.toast({ html: 'Lütfen adınızı ve mesajınızı doldurun!' });
+            return;
+        }
+
+        // Gönder butonunu devre dışı bırak ve yükleme ekranını göster
+        sendButton.classList.add('disabled');
+        feedbackLoading.style.display = 'block';
+
+        // EmailJS ile mesaj gönderme
+        emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+            from_name: name,
+            from_email: email || 'Bilinmiyor',
+            message: message,
+            reply_to: email || 'nobetplani@gmail.com'
+        })
+        .then(() => {
+            feedbackLoading.style.display = 'none';
+            sendButton.classList.remove('disabled');
+            M.toast({ html: 'Geri bildiriminiz başarıyla gönderildi!' });
+            const modal = M.Modal.getInstance(document.getElementById('feedbackModal'));
+            modal.close();
+            document.getElementById('feedbackForm').reset();
+        })
+        .catch(error => {
+            feedbackLoading.style.display = 'none';
+            sendButton.classList.remove('disabled');
+            let errorMessage = 'Mesaj gönderilirken bir hata oluştu.';
+            if (error.text) {
+                try {
+                    const errorData = JSON.parse(error.text);
+                    errorMessage += ` Detay: ${errorData.message || error.text}`;
+                } catch (e) {
+                    errorMessage += ` Detay: ${error.text}`;
+                }
+            } else if (error.status) {
+                errorMessage += ` HTTP Durumu: ${error.status}`;
+            }
+            M.toast({ html: errorMessage });
+            console.error('EmailJS Hatası:', error);
+        });
+    }
     </script>
     
        <footer class="fixed-footer">
