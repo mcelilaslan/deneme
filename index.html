@@ -1293,7 +1293,7 @@
     </div>
 
    <!-- Geri Bildirim Modalı -->
-      <div id="feedbackModal" class="modal">
+     <div id="feedbackModal" class="modal">
           <div class="modal-content">
               <h4>Geri Bildirim Gönder</h4>
               <p>Bize görüşlerinizi iletebilirsiniz!</p>
@@ -1331,7 +1331,7 @@
           </div>
           <div class="modal-footer">
               <a href="#!" class="modal-close waves-effect waves-red btn-flat">İptal</a>
-              <a href="#!" class="waves-effect waves-green btn teal" onclick="sendFeedback()">Gönder</a>
+              <a href="#!" id="feedback_submit" class="waves-effect waves-green btn teal" onclick="sendFeedback()">Gönder</a>
           </div>
       </div>
 
@@ -2985,12 +2985,25 @@
          
          
          // Geri Bildirim Gönderme Fonksiyonu
-         function sendFeedback() {
-             const name = document.getElementById('feedbackName').value.trim();
-             const email = document.getElementById('feedbackEmail').value.trim();
-             const message = document.getElementById('feedbackMessage').value.trim();
+        function sendFeedback() {
+             const nameInput = document.getElementById('feedbackName');
+             const emailInput = document.getElementById('feedbackEmail');
+             const messageInput = document.getElementById('feedbackMessage');
              const submitButton = document.getElementById('feedback_submit');
              const feedbackLoading = document.getElementById('feedbackLoading');
+         
+             // Elementlerin varlığını kontrol et
+             if (!nameInput || !emailInput || !messageInput || !submitButton || !feedbackLoading) {
+                 M.toast({ html: 'Form elementleri bulunamadı! Lütfen sayfayı yenileyin.' });
+                 console.error('Missing elements:', {
+                     nameInput, emailInput, messageInput, submitButton, feedbackLoading
+                 });
+                 return;
+             }
+         
+             const name = nameInput.value.trim();
+             const email = emailInput.value.trim();
+             const message = messageInput.value.trim();
          
              if (!name || !message) {
                  M.toast({ html: 'Lütfen adınızı ve mesajınızı doldurun!' });
