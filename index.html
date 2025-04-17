@@ -25,7 +25,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+      <script type="text/javascript">
+           document.addEventListener('DOMContentLoaded', function() {
+               emailjs.init({
+                   publicKey: 'er7AJzh0We5M1Z5kn'
+               });
+               const modals = document.querySelectorAll('.modal');
+               M.Modal.init(modals);
+           });
+       </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
    <style>
         body {
@@ -2975,70 +2984,49 @@
         
          // EmailJS başlatma
          document.addEventListener('DOMContentLoaded', function() {
-             emailjs.init('er7AJzh0We5M1Z5kn'); // EmailJS User ID'nizi buraya ekleyin
-             // Modal başlatma
+             emailjs.init({
+                 publicKey: 'er7AJzh0We5M1Z5kn' // EmailJS Public Key'iniz
+             });
              const modals = document.querySelectorAll('.modal');
              M.Modal.init(modals);
          });
          
          // Geri Bildirim Gönderme Fonksiyonu
          function sendFeedback() {
-             const name = document.getElementById('feedbackName').value.trim();
-             const email = document.getElementById('feedbackEmail').value.trim();
-             const message = document.getElementById('feedbackMessage').value.trim();
-             const feedbackLoading = document.getElementById('feedbackLoading');
-             const sendButton = document.querySelector('#feedbackModal .btn.teal');
-         
-             // Doğrulama
-             if (!name || !message) {
-                 M.toast({ html: 'Lütfen adınızı ve mesajınızı doldurun!' });
-                 return;
-             }
-         
-             // feedbackLoading kontrolü
-             if (!feedbackLoading) {
-                 M.toast({ html: 'Hata: Yükleme ekranı bulunamadı. Lütfen sayfayı yenileyin.' });
-                 console.error('feedbackLoading elementi bulunamadı. HTML\'de id="feedbackLoading" div\'ini kontrol edin.');
-                 return;
-             }
-         
-             // Gönder butonunu devre dışı bırak ve yükleme ekranını göster
-             sendButton.classList.add('disabled');
-             feedbackLoading.style.display = 'block';
-         
-             // EmailJS ile mesaj gönderme
-             emailjs.send('nobet_plani', 'template_3nxu9rm', {
-                 from_name: name,
-                 from_email: email || 'Bilinmiyor',
-                 message: message,
-                 reply_to: email || 'nobetplani@gmail.com'
-             })
-             .then(() => {
-                 feedbackLoading.style.display = 'none';
-                 sendButton.classList.remove('disabled');
-                 M.toast({ html: 'Geri bildiriminiz başarıyla gönderildi!' });
-                 const modal = M.Modal.getInstance(document.getElementById('feedbackModal'));
-                 modal.close();
-                 document.getElementById('feedbackForm').reset();
-             })
-             .catch(error => {
-                 feedbackLoading.style.display = 'none';
-                 sendButton.classList.remove('disabled');
-                 let errorMessage = 'Mesaj gönderilirken bir hata oluştu.';
-                 if (error.text) {
-                     try {
-                         const errorData = JSON.parse(error.text);
-                         errorMessage += ` Detay: ${errorData.message || error.text}`;
-                     } catch (e) {
-                         errorMessage += ` Detay: ${error.text}`;
-                     }
-                 } else if (error.status) {
-                     errorMessage += ` HTTP Durumu: ${error.status}`;
-                 }
-                 M.toast({ html: errorMessage });
-                 console.error('EmailJS Hatası:', error);
-             });
-         }
+    const name = document.getElementById('feedback_name').value.trim();
+    const email = document.getElementById('feedback_email').value.trim();
+    const message = document.getElementById('feedback_message').value.trim();
+    const submitButton = document.getElementById('feedback_submit');
+    const feedbackLoading = document.getElementById('feedbackLoading');
+
+    if (!name || !message) {
+        M.toast({ html: 'Lütfen adınızı ve mesajınızı doldurun!' });
+        return;
+    }
+
+    submitButton.classList.add('disabled');
+    feedbackLoading.style.display = 'block';
+
+    emailjs.send('nobet_plani', 'template_3nxu9rm', {
+        from_name: name,
+        from_email: email || 'Bilinmiyor',
+        message: message,
+        reply_to: email || 'nobetplani@gmail.com'
+    })
+    .then(() => {
+        M.toast({ html: 'Geri bildiriminiz başarıyla gönderildi!' });
+        document.getElementById('feedback_form').reset();
+        M.Modal.getInstance(document.getElementById('feedbackModal')).close();
+    })
+    .catch((error) => {
+        console.error('EmailJS Hatası:', error);
+        M.toast({ html: 'Mesaj gönderilirken bir hata oluştu. Detay: ' + error.text });
+    })
+    .finally(() => {
+        submitButton.classList.remove('disabled');
+        feedbackLoading.style.display = 'none';
+    });
+}
 
 
     </script>
