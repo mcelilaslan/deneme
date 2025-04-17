@@ -1653,7 +1653,16 @@
         }
 
 
-        function toggleTeams() {
+       function toggleTeams() {
+          const hasTeams = document.getElementById('hasTeams').checked;
+          const groupingCheckbox = document.getElementById('groupingCheckbox');
+          if (hasTeams) {
+              groupingCheckbox.checked = false;
+              groupingCheckbox.disabled = true;
+              toggleGrouping();
+          } else {
+              groupingCheckbox.disabled = false;
+          }
           renderTable();
       }
 
