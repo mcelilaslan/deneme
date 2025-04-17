@@ -1290,31 +1290,22 @@
         </div>
     </div>
 
-      <!-- Geri Bildirim Modalı -->
-      <div id="feedbackModal" class="modal">
-          <div class="modal-content">
-              <h4>Geri Bildirim Gönder</h4>
-              <p>Bize görüşlerinizi iletebilirsiniz!</p>
-              <form id="feedbackForm">
-                  <div class="input-field">
-                      <input id="feedbackName" type="text" class="validate" required>
-                      <label for="feedbackName">Adınız</label>
-                  </div>
-                  <div class="input-field">
-                      <input id="feedbackEmail" type="email" class="validate">
-                      <label for="feedbackEmail">E-posta Adresiniz (Opsiyonel)</label>
-                  </div>
-                  <div class="input-field">
-                      <textarea id="feedbackMessage" class="materialize-textarea" required></textarea>
-                      <label for="feedbackMessage">Mesajınız</label>
-                  </div>
-              </form>
-          </div>
-          <div class="modal-footer">
-              <a href="#!" class="modal-close waves-effect waves-red btn-flat">İptal</a>
-              <a href="#!" class="waves-effect waves-green btn teal" onclick="sendFeedback()">Gönder</a>
-          </div>
-      </div>
+      <div id="feedbackLoading" style="display: none; text-align: center; margin-top: 10px;">
+    <div class="preloader-wrapper small active">
+        <div class="spinner-layer spinner-teal-only">
+            <div class="circle-clipper left">
+                <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+                <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+                <div class="circle"></div>
+            </div>
+        </div>
+    </div>
+    <span style="color: #26a69a; margin-left: 10px;">Mesaj gönderiliyor...</span>
+</div>
 
     <!-- Yükleme Ekranı -->
     <div id="loadingOverlay" class="loading-overlay">
