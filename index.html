@@ -1836,9 +1836,10 @@
         }
 
         function updateGroup(index, value) {
-            persons[index].group = parseInt(value);
-            renderTable();
-        }
+          persons[index].group = parseInt(value);
+          console.log("Güncellenen persons:", JSON.stringify(persons, null, 2));
+          renderTable();
+      }
 
         function updateDuty(index, type, value) {
             if (value === "" || value === null) {
@@ -2733,6 +2734,7 @@
               return;
           }
       
+          console.log("autoAssignDuties öncesi persons:", JSON.stringify(persons, null, 2));
           const personnelDuties = persons.map(person => ({
               name: person.name,
               weekdayLeft: person.weekdayDuties || 0,
