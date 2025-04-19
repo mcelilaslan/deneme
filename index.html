@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -26,16 +25,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-      <script type="text/javascript">
-           document.addEventListener('DOMContentLoaded', function() {
-               emailjs.init({
-                   publicKey: 'er7AJzh0We5M1Z5kn'
-               });
-               const modals = document.querySelectorAll('.modal');
-               M.Modal.init(modals);
-           });
-       </script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
    <style>
         body {
@@ -484,18 +473,23 @@
         }
     
         .switch-container {
-           background-color: rgba(119,190,186,255) !important;
-           border: 2px solid #b0bec5;
-           padding: 6px 10px; 
-           border-radius: 8px;
-           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-           display: flex;
-           flex-direction: column; 
-           align-items: flex-start; 
-           height: auto; 
-           justify-content: center;
+            background-color: rgba(119,190,186,255) !important;
+            border: 2px solid #b0bec5;
+            padding: 6px 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: inline-flex; /* Flex yerine inline-flex */
+            flex-direction: column;
+            align-items: flex-start;
+            width: auto; /* Genişlik içeriğe göre */
+            box-sizing: border-box;
         }
 
+        .switch-container label {
+            width: auto;
+            white-space: nowrap;
+        }
+       
         balance-label {
             display: flex;
             align-items: center;
@@ -731,6 +725,15 @@
         .glow {
             animation: glow 4s ease-in-out infinite;
         }
+
+        .waves-effect.waves-light.btn.teal {
+            width: auto;
+            min-width: 0;
+            padding: 0 8px; /* Padding'i küçülttük */
+            box-sizing: border-box;
+            display: inline-flex; /* İkon ve metni hizalamak için */
+            align-items: center;
+        }
         
         @keyframes glow {
             0% {
@@ -760,7 +763,11 @@
             animation: bounce 1s infinite;
         }
 
-
+        @media only screen and (max-width: 600px) {
+            .control-buttons .btn {
+                font-size: 0.8rem;
+            }
+        }
 
         /* Mobil Stiller */
         @media only screen and (max-width: 900px) {
@@ -933,12 +940,12 @@
                             <li><a class="btn-floating tiny waves-effect waves-light teal"><i class="material-icons">add</i></a> simgesine tıklayarak listeye personel ekleyebilirsiniz.</li>
                             <li>Birlikte nöbet tutmak isteyen/ tutması gereken personeller varsa aynı gruba ekleyerek aynı güne nöbetçi atanmalarını sağlayabilirsiniz</li>
                             <li><a class="btn-floating tiny waves-effect waves-light grey"><i class="material-icons">more_vert</i></a>tuşu ile oluşturduğunuz personel listesini indirebilir, sonraki kullanımlarda yükleyerek süreci hızlandırabilirsiniz.</li>
-                            <li>Nöbet sayılarını "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbet dağıt ve Takvim oluştur" tuşu ile otomatik dağıtabilir veya kendiniz dağıtabilirsiniz.</li>
+                            <li>Nöbet sayıları "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbetleri Adaletli Dağıt" tuşu ile otomatik dağıtılır, kendiniz de düzenleyebilirsiniz.</li>
                             <li>Kişilere ayrı ayrı hafta içi / hafta sonu nöbet sayıları belirleyebilirsiniz.</li>
                             <li>İki nöbet arası en az boşluk toplu veya kişiye özel olabilir.</li>
-                            <li>Personel planı bittiğinde "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbet dağıt ve Takvim oluştur" tuşuna basınız.</li>
-                            <li>Cuma ve Perşembe günlerini dengelemek isterseniz ilgili kutucukları tikleyiniz.</li>
+                            <li>Personel planı bittiğinde "<a class="btn-floating tiny waves-effect waves-light blue"><i class="material-icons">event</i></a>Nöbetleri Adaleti Dağıt" tuşuna basınız. Takvimin oluşturulduğunu göreceksiniz.</li>
                             <li>Varsa <font color="red">istenmeyen ✖</font>/<font color="green">istenen ✓</font> günleri takvim üzerinde işaretleyerek "<a class="btn-floating tiny waves-effect waves-light purple"><i class="material-icons">auto_fix_high</i></a>Otomatik Ata" tuşuna basınız.</li>
+                            <li>Cuma ve Perşembe günlerini dengelemek isterseniz ilgili kutucukları tikleyiniz.</li>
                             <li>Geri al tuşu ile takvimdeki son değişikliği geri alabilirsiniz. Temizle butonu takvimi sıfırlar.</li>
                             <li>Listeyi excel formatında indirmek için "<a class="btn-floating tiny waves-effect waves-light green"><i class="material-icons">file_download</i></a>İndir" tuşuna basınız.</li>
                         </ul>
@@ -1030,7 +1037,7 @@
                             <div class="row control-buttons">
                                 <div class="col s12">
                                     <button class="btn waves-effect waves-light blue" onclick="generateCalendar()">
-                                        <i class="material-icons left">event</i>Nöbet Dağıt ve Takvim Oluştur
+                                        <i class="material-icons left">event</i>Nöbetleri Adaletli Dağıt
                                     </button>
                                     <button class="btn waves-effect waves-light grey darken-3" onclick="resetDuties()">
                                         <i class="material-icons left">refresh</i>Dağıtımı Sıfırla
@@ -1115,10 +1122,9 @@
                             </div>
                             
                             <!-- İndir -->
-                            <div class="col s3">
+                              <div class="col s3">
                                 <button class="waves-effect waves-light btn teal tooltipped" 
                                     onclick="downloadSchedule()" 
-                                    style="min-width: 180px; white-space: nowrap; padding: 0 10px;" 
                                     data-position="bottom" 
                                     data-tooltip="Nöbet listesini Excel formatında indirir">
                                     <i class="material-icons left">file_download</i>İndir
@@ -1130,7 +1136,7 @@
             </ul>
         </div>
 
-        <!-- İstatistik Konteynırı -->
+       <!-- İstatistik Konteynırı -->
         <div class="custom-container">
             <ul class="collapsible popout" id="statsCollapsible">
                 <li>
@@ -1153,6 +1159,7 @@
                 </li>
             </ul>
         </div>
+    </div>
 
     <!-- Hata Modalı -->
     <div id="errorModal" class="modal">
@@ -1166,50 +1173,6 @@
         </div>
     </div>
 
-    <!-- Geri Bildirim Modalı -->
-     <div id="feedbackModal" class="modal">
-          <div class="modal-content">
-              <h4>Geri Bildirim Gönder</h4>
-              <p>Bize görüşlerinizi iletebilirsiniz!</p>
-              <form id="feedbackForm">
-                  <div class="input-field">
-                      <input id="feedbackName" type="text" class="validate" required>
-                      <label for="feedbackName">Adınız</label>
-                  </div>
-                  <div class="input-field">
-                      <input id="feedbackEmail" type="email" class="validate">
-                      <label for="feedbackEmail">E-posta Adresiniz (Opsiyonel)</label>
-                  </div>
-                  <div class="input-field">
-                      <textarea id="feedbackMessage" class="materialize-textarea" required></textarea>
-                      <label for="feedbackMessage">Mesajınız</label>
-                  </div>
-                  <!-- Form gönderilirken gösterilecek preloader -->
-                  <div id="feedbackLoading" style="display: none; text-align: center; margin-top: 10px;">
-                      <div class="preloader-wrapper small active">
-                          <div class="spinner-layer spinner-teal-only">
-                              <div class="circle-clipper left">
-                                  <div class="circle"></div>
-                              </div>
-                              <div class="gap-patch">
-                                  <div class="circle"></div>
-                              </div>
-                              <div class="circle-clipper right">
-                                  <div class="circle"></div>
-                              </div>
-                          </div>
-                      </div>
-                      <span style="color: #26a69a; margin-left: 10px;">Mesaj gönderiliyor...</span>
-                  </div>
-              </form>
-          </div>
-          <div class="modal-footer">
-              <a href="#!" class="modal-close waves-effect waves-red btn-flat">İptal</a>
-              <a href="#!" id="feedback_submit" class="waves-effect waves-green btn teal" onclick="sendFeedback()">Gönder</a>
-          </div>
-      </div>
-
-        
     <!-- Yükleme Ekranı -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="preloader-wrapper active">
@@ -1748,7 +1711,7 @@
         
             // Mobil ve masaüstü için konumlandırma
             if (isMobileDevice()) {
-                alertDiv.style.top = '20px';
+                alertDiv.style.top = '35%';
                 alertDiv.style.left = '50%';
                 alertDiv.style.transform = 'translateX(-50%)';
                 if (window.innerWidth < 360) {
@@ -1835,6 +1798,12 @@
 
 
         function generateCalendar() {
+
+            if (persons.length < 3) {
+                M.toast({ html: 'Lütfen en az 3 personel ekleyin!' });
+                return;
+            }
+            
             const startInput = document.getElementById('startDate').value;
             const endInput = document.getElementById('endDate').value;
             const dutyPerDayInput = document.getElementById('dutyPerDay').value.trim();
@@ -2411,6 +2380,30 @@
         }
 
         function downloadSchedule() {
+
+            // Takvim doluluk kontrolü
+                const startInput = document.getElementById('startDate').value;
+                const endInput = document.getElementById('endDate').value;
+                const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value) || 1;
+                const [startDay, startMonth, startYear] = startInput.split('-').map(Number);
+                const [endDay, endMonth, endYear] = endInput.split('-').map(Number);
+                const start = new Date(startYear, startMonth - 1, startDay);
+                const end = new Date(endYear, endMonth - 1, endDay);
+                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+            
+                let allDaysFilled = true;
+                for (let d = 0; d < days; d++) {
+                    const assigned = document.querySelectorAll(`td[data-dindex="${d}"].selected`).length;
+                    if (assigned < dutyPerDay) {
+                        allDaysFilled = false;
+                        break;
+                    }
+                }
+                if (!allDaysFilled) {
+                    M.toast({ html: 'Tüm günlere yeteri kadar nöbetçi atanmadı, takvimi doldurun!' });
+                    return;
+                }
+            
             performExport(function(blob, fileName) {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -2633,7 +2626,7 @@
 
             saveToHistory();
 
-            const CLOUD_FUNCTIONS_URL = 'https://optimize-nobet-174463354439.us-central1.run.app';
+            const CLOUD_FUNCTIONS_URL = 'https://optimize-nobet-88931343134.us-central1.run.app';
 
             fetch(CLOUD_FUNCTIONS_URL, {
                 method: 'POST',
@@ -2793,72 +2786,19 @@
             updateStatistics();
             M.toast({ html: 'Takvimdeki tüm işaretlemeler temizlendi!' });
         }
-
-
-         // Geri Bildirim Gönderme Fonksiyonu
-        function sendFeedback() {
-             const nameInput = document.getElementById('feedbackName');
-             const emailInput = document.getElementById('feedbackEmail');
-             const messageInput = document.getElementById('feedbackMessage');
-             const submitButton = document.getElementById('feedback_submit');
-             const feedbackLoading = document.getElementById('feedbackLoading');
-         
-             // Elementlerin varlığını kontrol et
-             if (!nameInput || !emailInput || !messageInput || !submitButton || !feedbackLoading) {
-                 M.toast({ html: 'Form elementleri bulunamadı! Lütfen sayfayı yenileyin.' });
-                 console.error('Missing elements:', {
-                     nameInput, emailInput, messageInput, submitButton, feedbackLoading
-                 });
-                 return;
-             }
-         
-             const name = nameInput.value.trim();
-             const email = emailInput.value.trim();
-             const message = messageInput.value.trim();
-         
-             if (!name || !message) {
-                 M.toast({ html: 'Lütfen adınızı ve mesajınızı doldurun!' });
-                 return;
-             }
-         
-             submitButton.classList.add('disabled');
-             feedbackLoading.style.display = 'block';
-         
-             emailjs.send('nobet_plani', 'template_3nxu9rm', {
-                 from_name: name,
-                 from_email: email || 'Bilinmiyor',
-                 message: message,
-                 reply_to: email || 'nobetplani@gmail.com'
-             })
-             .then(() => {
-                 M.toast({ html: 'Geri bildiriminiz başarıyla gönderildi!' });
-                 document.getElementById('feedbackForm').reset();
-                 M.Modal.getInstance(document.getElementById('feedbackModal')).close();
-             })
-             .catch((error) => {
-                 console.error('EmailJS Hatası:', error);
-                 M.toast({ html: 'Mesaj gönderilirken bir hata oluştu. Detay: ' + error.text });
-             })
-             .finally(() => {
-                 submitButton.classList.remove('disabled');
-                 feedbackLoading.style.display = 'none';
-             });
-         }
     </script>
     
-     <footer class="fixed-footer">
-          <div class="footer-content">
-              © 2025 - nobetplani.com - CK
-            
-              <a href="https://www.instagram.com/nobetplani" target="_blank" style="margin-left: 10px;">
-                  <img src="instagram-logo.png" style="width: 24px; height: 24px; vertical-align: middle;">
-              </a>
-              <a href="#feedbackModal" class="modal-trigger" style="margin-left: 10px; color: #fff; text-decoration: none;">
-                  <i class="material-icons" style="vertical-align: middle; font-size: 24px;">feedback</i>
-                  Geri Bildirim
-              </a>
-          </div>
-      </footer>
+       <footer class="fixed-footer">
+        <div class="footer-content">
+            © 2025 - nobetplani.com - CK
+            <a href="mailto:nobetplani@gmail.com" style="margin-left: 10px;">
+                <img src="gmail-logo.png" style="width: 24px; height: 24px; vertical-align: middle;">
+            </a>
+            <a href="https://www.instagram.com/nobetplani" target="_blank" style="margin-left: 10px;">
+                <img src="instagram-logo.png" style="width: 24px; height: 24px; vertical-align: middle;">
+            </a>
+        </div>
+    </footer>
 
 
 </body>
