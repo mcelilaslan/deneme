@@ -1824,9 +1824,8 @@
             const selects = tableContainer.querySelectorAll('select');
             selects.forEach(select => {
                 select.style.display = 'block';
-                select.removeAttribute('data-m-select');
-                if (select.M_FormSelect) {
-                    select.M_FormSelect.destroy();
+                if (!select.M_FormSelect) {
+                    M.FormSelect.init(select);
                 }
             });
         }
@@ -1838,15 +1837,20 @@
 
         function updateGroup(index, value) {
             persons[index].group = parseInt(value);
+            console.log(`Personel ${index + 1} grup güncellendi:`, persons[index].group); // Debugging
             renderTable();
         }
 
         function updateDuty(index, type, value) {
-            if (value === "" || value === null) {
-                persons[index][type] = undefined;
-            } else {
-                persons[index][type] = parseInt(value) || 0;
-            }
+            persons[index][type] = parseInt(value) || 0;
+            console.log(`Personel ${index + 1} ${type} güncellendi:`, persons[index][type]); // Debugging
+            renderTable();
+        }
+
+         function updateMinDays(index, delta) {
+            persons[index].minDaysBetween = Math.max(0, (persons[index].minDaysBetween || 0) + delta);
+            console.log(`Personel ${index + 1} minDaysBetween güncellendi:`, persons[index].minDaysBetween); // Debugging
+            renderTable();
         }
 
         function resetDuties() {
@@ -2743,6 +2747,8 @@
               originalIndex: persons.findIndex(p => p.name === person.name),
               group: person.group || 0
           }));
+
+         console.log('Gönderilen personel verisi:', personnelDuties);
       
           document.getElementById('loadingOverlay').style.display = 'flex';
       
