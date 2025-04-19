@@ -2734,14 +2734,29 @@
           }
       
          console.log("autoAssignDuties öncesi persons:", JSON.stringify(persons, null, 2));
-         const personnelDuties = persons.map(person => ({
+
+         // Grup değerlerini kullanıcı arayüzünden oku
+         const groupingEnabled = document.getElementById('groupingCheckbox').checked;
+         const groupValues = [];
+         if (groupingEnabled && dutyPerDay >= 2) {
+             const selects = document.querySelectorAll('#personnelTableContainer select.group-select');
+             selects.forEach((select, index) => {
+                 groupValues[index] = parseInt(select.value) || 0;
+             });
+         } else {
+             persons.forEach((_, index) => {
+                 groupValues[index] = 0;
+             });
+         }
+         
+         const personnelDuties = persons.map((person, index) => ({
              name: person.name,
              weekdayLeft: person.weekdayDuties || 0,
              weekendLeft: person.weekendDuties || 0,
              minDaysBetween: person.minDaysBetween,
              dutyDays: [],
              originalIndex: persons.findIndex(p => p.name === person.name),
-             group: person.group || 0
+             group: groupValues[index]
          }));
       
           document.getElementById('loadingOverlay').style.display = 'flex';
@@ -2767,12 +2782,9 @@
           const balanceThursdays = document.getElementById('balanceThursdays').checked;
       
           // Grup kontrolü için ek validation
-         const groupingEnabled = document.getElementById('groupingCheckbox').checked;
-         
-         // Kontrol: Grup büyüklüğü ile dutyPerDay uyumsuzluğu
-         if (groupingEnabled) {
+         if (groupingEnabled && dutyPerDay >= 2) {
              const groupSizes = {};
-             persons.forEach(person => {
+             personnelDuties.forEach(person => {
                  if (person.group > 0) {
                      groupSizes[person.group] = (groupSizes[person.group] || 0) + 1;
                  }
