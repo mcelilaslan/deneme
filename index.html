@@ -1705,139 +1705,140 @@
             availabilityMode = !switchInput.checked;
         }
 
-       function renderTable() {
-             const tableContainer = document.getElementById('personnelTableContainer');
-             const noPersonnelMessage = document.getElementById('noPersonnelMessage');
-             const groupingSwitch = document.getElementById('groupingSwitch');
-             const groupingEnabled = document.getElementById('groupingCheckbox').checked;
-             const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value.trim()) || 0;
-             const isMobile = window.innerWidth <= 900;
-         
-             if (dutyPerDay >= 2) {
-                 groupingSwitch.style.display = 'block';
-             } else {
-                 groupingSwitch.style.display = 'none';
-                 document.getElementById('groupingCheckbox').checked = false;
-             }
-         
-             if (persons.length === 0) {
-                 tableContainer.style.display = 'none';
-                 noPersonnelMessage.style.display = 'block';
-             } else {
-                 tableContainer.style.display = 'table';
-                 noPersonnelMessage.style.display = 'none';
-         
-                 const tableStyle = isMobile 
-                     ? 'max-width: 100%; overflow-x: auto; display: block;'
-                     : 'width: 100%;';
-         
-                 let html = `
-                     <table style="${tableStyle}">
-                     <thead>
-                         <tr style="background-color: #e5e7eb;">
-                             ${groupingEnabled ? '<th>Grup</th>' : ''}
-                             <th style="text-align:center">İsim</th>
-                             <th style="text-align:center">Hafta İçi</th>
-                             <th style="text-align:center">Hf Sonu</th>
-                             <th class="duty-gap-header" style="${isMobile ? 'font-size: 12px; line-height: 1.2; padding: 4px; white-space: normal; height: auto;' : ''}">
-                                 ${isMobile 
-                                     ? '2 Nöbet Arası<br>Boşluk'
-                                     : '2 Nöbet Arası Boşluk'}
-                                 <a class="btn-floating btn-small waves-effect waves-light teal decrement-btn" onclick="decrementAllDutyGaps()"
-                                    style="${isMobile ? 'width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
-                                     <i class="material-icons" style="${isMobile ? 'font-size: 10px; line-height: 10px;' : ''}">arrow_downward</i>
-                                 </a>
-                                 <a class="btn-floating btn-small waves-effect waves-light teal increment-btn" onclick="incrementAllDutyGaps()"
-                                    style="${isMobile ? 'width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
-                                     <i class="material-icons" style="${isMobile ? 'font-size: 10px; line-height: 10px;' : ''}">arrow_upward</i>
-                                 </a>
-                             </th>
-                             <th style="text-align: center;">Sil</th>
-                         </tr>
-                     </thead>
-                     <tbody id="personTable">
-                 `;
-         
-                 const groupCount = Math.ceil(persons.length / 2);
-         
-                 persons.forEach((person, index) => {
-                     let groupOptions = '<option value="0">Seç</option>';
-                     for (let i = 1; i <= groupCount; i++) {
-                         groupOptions += `<option value="${i}" ${person.group === i ? 'selected' : ''}>${i}</option>`;
-                     }
-         
-                     const maxNameLength = isMobile ? 8 : 20;
-                     const displayName = person.name.length > maxNameLength 
-                         ? person.name.substring(0, isMobile ? 5 : maxNameLength - 3) + '...' 
-                         : person.name;
-         
-                     html += `
-                         <tr style="height: ${isMobile ? '40px' : '48px'}; background-color: ${index % 2 === 0 ? '#ffffff' : '#f9fafb'}; border-bottom: 1px solid #e5e7eb;">
-                             ${groupingEnabled && groupCount > 0 ? `
-                                 <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px;">
-                                     <select class="group-select" style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 2px 4px 8px; width: auto; background-color: #ffffff; color: #374151; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 2px center;" onchange="updateGroup(${index}, this.value)">
-                                         ${groupOptions}
-                                     </select>
-                                 </td>
-                             ` : ''}
-                             <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px; font-family: 'Arial', sans-serif; color: #374151; font-size: ${isMobile ? '12px' : '14px'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="${person.name}">
-                                 ${displayName}
-                             </td>
-                             <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '2px' : '8px'};">
-                                 <input type="number" class="planning-input" min="0" 
-                                     value="${person.weekdayDuties === undefined ? '' : person.weekdayDuties}" 
-                                     onchange="updateDuty(${index}, 'weekdayDuties', this.value)"
-                                     style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background-color: #ffffff; color: #374151; width: ${isMobile ? '50px' : '80px'}; transition: border-color 0.3s; outline: none;">
-                             </td>
-                             <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '2px' : '8px'};">
-                                 <input type="number" class="planning-input" min="0" 
-                                     value="${person.weekendDuties === undefined ? '' : person.weekendDuties}" 
-                                     onchange="updateDuty(${index}, 'weekendDuties', this.value)"
-                                     style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background-color: #ffffff; color: #374151; width: ${isMobile ? '50px' : '80px'}; transition: border-color 0.3s; outline: none;">
-                             </td>
-                             <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '12px' : '8px'}; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; white-space: nowrap;">
-                                 <span style="margin-right: ${isMobile ? '4px' : '8px'}; font-size: ${isMobile ? '12px' : '14px'}; color: #4b5563;">${person.minDaysBetween}</span>
-                                 <a class="btn-floating btn-small waves-effect waves-light teal" onclick="decrementDutyGap(${index})"
-                                    style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
-                                     <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">arrow_downward</i>
-                                 </a>
-                                 <a class="btn-floating btn-small waves-effect waves-light teal" onclick="incrementDutyGap(${index})"
-                                    style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
-                                     <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">arrow_upward</i>
-                                 </a>
-                             </td>
-                             <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px; text-align: center;">
-                                 <a class="btn-floating btn-small waves-effect waves-light red" onclick="deletePerson(${index})"
-                                    style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
-                                     <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">delete</i>
-                                 </a>
-                             </td>
-                         </tr>
-                     `;
-                 });
-         
-                 html += `</tbody></table>`;
-                 tableContainer.innerHTML = html;
-         
-                 const selects = tableContainer.querySelectorAll('select');
-                 selects.forEach(select => {
-                     select.style.display = 'block';
-                     select.removeAttribute('data-m-select');
-                     if (select.M_FormSelect) {
-                         select.M_FormSelect.destroy();
-                     }
-                 });
-             }
+    function renderTable() {
+        const tableContainer = document.getElementById('personnelTableContainer');
+        const noPersonnelMessage = document.getElementById('noPersonnelMessage');
+        const groupingSwitch = document.getElementById('groupingSwitch');
+        const groupingEnabled = document.getElementById('groupingCheckbox').checked;
+        const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value.trim()) || 0;
+        const isMobile = window.innerWidth <= 900;
+    
+        if (dutyPerDay >= 2) {
+            groupingSwitch.style.display = 'block';
+        } else {
+            groupingSwitch.style.display = 'none';
+            document.getElementById('groupingCheckbox').checked = false;
+        }
+    
+        if (persons.length === 0) {
+            tableContainer.style.display = 'none';
+            noPersonnelMessage.style.display = 'block';
+        } else {
+            tableContainer.style.display = 'table';
+            noPersonnelMessage.style.display = 'none';
+    
+            const tableStyle = isMobile 
+                ? 'max-width: 100%; overflow-x: auto; display: block;'
+                : 'width: 100%;';
+    
+            let html = `
+                <table style="${tableStyle}">
+                <thead>
+                    <tr style="background-color: #e5e7eb;">
+                        ${groupingEnabled ? '<th>Grup</th>' : ''}
+                        <th style="text-align:center">İsim</th>
+                        <th style="text-align:center">Hafta İçi</th>
+                        <th style="text-align:center">Hf Sonu</th>
+                        <th class="duty-gap-header" style="${isMobile ? 'font-size: 12px; line-height: 1.2; padding: 4px; white-space: normal; height: auto;' : ''}">
+                            ${isMobile 
+                                ? '2 Nöbet Arası<br>Boşluk'
+                                : '2 Nöbet Arası Boşluk'}
+                            <a class="btn-floating btn-small waves-effect waves-light teal decrement-btn" onclick="decrementAllDutyGaps()"
+                               style="${isMobile ? 'width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
+                                <i class="material-icons" style="${isMobile ? 'font-size: 10px; line-height: 10px;' : ''}">arrow_downward</i>
+                            </a>
+                            <a class="btn-floating btn-small waves-effect waves-light teal increment-btn" onclick="incrementAllDutyGaps()"
+                               style="${isMobile ? 'width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
+                                <i class="material-icons" style="${isMobile ? 'font-size: 10px; line-height: 10px;' : ''}">arrow_upward</i>
+                            </a>
+                        </th>
+                        <th style="text-align: center;">Sil</th>
+                    </tr>
+                </thead>
+                <tbody id="personTable">
+            `;
+    
+            const groupCount = Math.ceil(persons.length / 2);
+    
+            persons.forEach((person, index) => {
+                let groupOptions = '<option value="0">Seç</option>';
+                for (let i = 1; i <= groupCount; i++) {
+                    groupOptions += `<option value="${i}" ${person.group === i ? 'selected' : ''}>${i}</option>`;
+                }
+    
+                // Mobil için isim kısaltma: 8 karakterden uzunsa 5 + "..."
+                const maxNameLength = isMobile ? 8 : 20;
+                const displayName = person.name.length > maxNameLength 
+                    ? person.name.substring(0, isMobile ? 5 : maxNameLength - 3) + '...' 
+                    : person.name;
+    
+                html += `
+                    <tr style="height: ${isMobile ? '40px' : '48px'}; background-color: ${index % 2 === 0 ? '#ffffff' : '#f9fafb'}; border-bottom: 1px solid #e5e7eb;">
+                        ${groupingEnabled && groupCount > 0 ? `
+                            <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px;">
+                                <select class="group-select" style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 2px 4px 8px; width: auto; background-color: #ffffff; color: #374151; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23374151\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>'); background-repeat: no-repeat; background-position: right 2px center;" onchange="updateGroup(${index}, this.value)">
+                                  ${groupOptions}
+                              </select>
+                            </td>
+                        ` : ''}
+                        <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px; font-family: 'Arial', sans-serif; color: #374151; font-size: ${isMobile ? '12px' : '14px'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="${person.name}">
+                            ${displayName}
+                        </td>
+                        <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '2px' : '8px'};">
+                            <input type="number" class="planning-input" min="0" 
+                                value="${person.weekdayDuties === undefined ? '' : person.weekdayDuties}" 
+                                onchange="updateDuty(${index}, 'weekdayDuties', this.value)"
+                                style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background-color: #ffffff; color: #374151; width: ${isMobile ? '50px' : '80px'}; transition: border-color 0.3s; outline: none;">
+                        </td>
+                        <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '2px' : '8px'};">
+                            <input type="number" class="planning-input" min="0" 
+                                value="${person.weekendDuties === undefined ? '' : person.weekendDuties}" 
+                                onchange="updateDuty(${index}, 'weekendDuties', this.value)"
+                                style="height: ${isMobile ? '28px' : '32px'}; font-size: ${isMobile ? '12px' : '14px'}; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background-color: #ffffff; color: #374151; width: ${isMobile ? '50px' : '80px'}; transition: border-color 0.3s; outline: none;">
+                        </td>
+                        <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 ${isMobile ? '12px' : '8px'}; display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; white-space: nowrap;">
+                            <span style="margin-right: ${isMobile ? '4px' : '8px'}; font-size: ${isMobile ? '12px' : '14px'}; color: #4b5563;">${person.minDaysBetween}</span>
+                            <a class="btn-floating btn-small waves-effect waves-light teal" onclick="decrementDutyGap(${index})"
+                               style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
+                                <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">arrow_downward</i>
+                            </a>
+                            <a class="btn-floating btn-small waves-effect waves-light teal" onclick="incrementDutyGap(${index})"
+                               style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
+                                <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">arrow_upward</i>
+                            </a>
+                        </td>
+                        <td style="height: ${isMobile ? '40px' : '48px'}; vertical-align: middle; padding: 0 8px; text-align: center;">
+                            <a class="btn-floating btn-small waves-effect waves-light red" onclick="deletePerson(${index})"
+                               style="${isMobile ? 'width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin: 2px;' : ''}">
+                                <i class="material-icons" style="${isMobile ? 'font-size: 8px; line-height: 8px;' : ''}">delete</i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+    
+            html += `</tbody></table>`;
+            tableContainer.innerHTML = html;
+    
+            const selects = tableContainer.querySelectorAll('select');
+            selects.forEach(select => {
+                select.style.display = 'block';
+                select.removeAttribute('data-m-select');
+                if (select.M_FormSelect) {
+                    select.M_FormSelect.destroy();
+                }
+            });
+        }
+    }
 
         function toggleGrouping() {
             renderTable();
         }
 
         function updateGroup(index, value) {
-          persons[index].group = parseInt(value);
-          console.log("Güncellenen persons:", JSON.stringify(persons, null, 2));
-          renderTable();
-      }
+            persons[index].group = parseInt(value);
+            renderTable();
+        }
 
         function updateDuty(index, type, value) {
             if (value === "" || value === null) {
@@ -2732,31 +2733,16 @@
               return;
           }
       
-          console.log("autoAssignDuties öncesi persons:", JSON.stringify(persons, null, 2));
-      
-          // Grup değerlerini kullanıcı arayüzünden oku
-          const groupingEnabled = document.getElementById('groupingCheckbox').checked;
-          const groupValues = [];
-          if (groupingEnabled && dutyPerDay >= 2) {
-              const selects = document.querySelectorAll('#personnelTableContainer select.group-select');
-              selects.forEach((select, index) => {
-                  groupValues[index] = parseInt(select.value) || 0;
-              });
-          } else {
-              persons.forEach((_, index) => {
-                  groupValues[index] = 0;
-              });
-          }
-      
-          const personnelDuties = persons.map((person, index) => ({
-              name: person.name,
-              weekdayLeft: person.weekdayDuties || 0,
-              weekendLeft: person.weekendDuties || 0,
-              minDaysBetween: person.minDaysBetween,
-              dutyDays: [],
-              originalIndex: persons.findIndex(p => p.name === person.name),
-              group: groupValues[index]
-          }));
+         console.log("autoAssignDuties öncesi persons:", JSON.stringify(persons, null, 2));
+         const personnelDuties = persons.map(person => ({
+             name: person.name,
+             weekdayLeft: person.weekdayDuties || 0,
+             weekendLeft: person.weekendDuties || 0,
+             minDaysBetween: person.minDaysBetween,
+             dutyDays: [],
+             originalIndex: persons.findIndex(p => p.name === person.name),
+             group: person.group || 0
+         }));
       
           document.getElementById('loadingOverlay').style.display = 'flex';
       
@@ -2781,23 +2767,26 @@
           const balanceThursdays = document.getElementById('balanceThursdays').checked;
       
           // Grup kontrolü için ek validation
-          if (groupingEnabled && dutyPerDay >= 2) {
-              const groupSizes = {};
-              personnelDuties.forEach(person => {
-                  if (person.group > 0) {
-                      groupSizes[person.group] = (groupSizes[person.group] || 0) + 1;
-                  }
-              });
-      
-              for (const group in groupSizes) {
-                  if (groupSizes[group] > dutyPerDay) {
-                      validationErrors.push({
-                          type: 'error',
-                          message: `${group}. grupta ${groupSizes[group]} kişi var, ancak nöbetçi sayısını ${dutyPerDay} seçtiniz!`
-                      });
-                  }
-              }
-          }
+         const groupingEnabled = document.getElementById('groupingCheckbox').checked;
+         
+         // Kontrol: Grup büyüklüğü ile dutyPerDay uyumsuzluğu
+         if (groupingEnabled) {
+             const groupSizes = {};
+             persons.forEach(person => {
+                 if (person.group > 0) {
+                     groupSizes[person.group] = (groupSizes[person.group] || 0) + 1;
+                 }
+             });
+         
+             for (const group in groupSizes) {
+                 if (groupSizes[group] > dutyPerDay) {
+                     validationErrors.push({
+                         type: 'error',
+                         message: `${group}. grupta ${groupSizes[group]} kişi var, ancak nöbetçi sayısını ${dutyPerDay} seçtiniz!`
+                     });
+                 }
+             }
+         }
       
           // Hata varsa modal aç ve işlemi durdur
           if (validationErrors.length > 0) {
@@ -2820,11 +2809,9 @@
               balanceThursdays: balanceThursdays
           };
       
-          console.log("Gönderilen data:", JSON.stringify(data, null, 2));
-      
           saveToHistory();
       
-          const CLOUD_FUNCTIONS_URL = 'https://optimize-nobet-174463354439.us-central1.run.app';
+          const CLOUD_FUNCTIONS_URL = 'https://proxy-solver-88931343134.us-central1.run.app';
       
           fetch(CLOUD_FUNCTIONS_URL, {
               method: 'POST',
@@ -2846,7 +2833,7 @@
                   updateCalendar();
                   updateStatistics();
                   saveToHistory();
-                  showToast('Tüm nöbetler atandı!', 4000);
+                  showToast('Tüm nöbetler atandı!', 4000); // Başarı mesajı, 4 saniye
               } else {
                   let errorMessage = data.error || 'Bilinmeyen bir hata oluştu';
                   if (status === 400 && errorMessage.includes('Nöbet atamaları yapılamadı')) {
@@ -2854,12 +2841,12 @@
                   } else if (status === 400 && errorMessage.includes('Cuma veya Perşembe dengeleme başarısız')) {
                       errorMessage = 'Hata: Cuma veya Perşembe dengeleme başarısız, bu seçenekleri kapatın veya nöbet ertesi boşlukları azaltın!';
                   }
-                  showToast(errorMessage, 10000);
+                  showToast(errorMessage, 10000); // Hata mesajı, 10 saniye
               }
           })
           .catch(error => {
               document.getElementById('loadingOverlay').style.display = 'none';
-              showToast('Sunucuyla bağlantı kurulamadı: ' + error.message, 10000);
+              showToast('Sunucuyla bağlantı kurulamadı: ' + error.message, 10000); // Hata mesajı, 10 saniye
           });
       }
         function updateCalendar() {
