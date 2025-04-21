@@ -195,7 +195,6 @@
             width: 100px !important;
             max-width: 200px !important;
             overflow: hidden;
-            text-overflow: ellipsis;
             padding: 0 5px;
             font-size: 14px;
         }
@@ -744,6 +743,25 @@
             display: inline-flex; /* İkon ve metni hizalamak için */
             align-items: center;
         }
+
+        @keyframes shake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+        25% {
+            transform: translateX(-5px);
+        }
+        50% {
+            transform: translateX(5px);
+        }
+        75% {
+            transform: translateX(-5px);
+        }
+    }
+
+        .m-toast.shake {
+            animation: shake 0.5s ease-in-out 3; /* 3 kez sallanır */
+        }
         
         @keyframes glow {
             0% {
@@ -1047,7 +1065,7 @@
                             <div class="row control-buttons">
                                 <div class="col s12">
                                     <button class="btn waves-effect waves-light blue" onclick="generateCalendar()">
-                                        <i class="material-icons left">event</i>Nöbetleri Adaletli Dağıt
+                                        <i class="material-icons left">event</i>Nöbet Sayılarını Dağıt
                                     </button>
                                     <button class="btn waves-effect waves-light grey darken-3" onclick="resetDuties()">
                                         <i class="material-icons left">refresh</i>Dağıtımı Sıfırla
@@ -1596,72 +1614,77 @@
             availabilityMode = !switchInput.checked;
         }
 
+        function truncateName(name) {
+            if (isMobileDevice() && name.length > 8) {
+                return name.substring(0, 5) + "...";
+            }
+            return name;
+        }
+
         function renderTable() {
             const tableContainer = document.getElementById('personnelTableContainer');
             const noPersonnelMessage = document.getElementById('noPersonnelMessage');
             const groupingSwitch = document.getElementById('groupingSwitch');
             const groupingEnabled = document.getElementById('groupingCheckbox').checked;
             const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value.trim()) || 0;
-        
+
             if (dutyPerDay >= 2) {
                 groupingSwitch.style.display = 'block';
             } else {
                 groupingSwitch.style.display = 'none';
                 document.getElementById('groupingCheckbox').checked = false;
             }
-        
+
             if (persons.length === 0) {
                 tableContainer.style.display = 'none';
                 noPersonnelMessage.style.display = 'block';
             } else {
                 tableContainer.style.display = 'table';
                 noPersonnelMessage.style.display = 'none';
-        
+
                 let html = `
-                    <div style="overflow-x: auto; width: 100%; box-sizing: border-box;">
-                        <table style="white-space: nowrap; width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr>
-                                    ${groupingEnabled ? '<th style="background-color: #f2f2f2;">Grup</th>' : ''}
-                                    <th style="background-color: #f2f2f2;">İsim</th>
-                                    <th style="background-color: #f2f2f2;">Hafta İçi</th>
-                                    <th style="background-color: #f2f2f2;">Hf Sonu</th>
-                                    <th class="duty-gap-header" style="background-color: #f2f2f2;">
-                                        ${isMobileDevice() ? '2 Nöbet<br>Arası Boşluk' : '2 Nöbet Arası Boşluk'}
-                                        <a class="btn-floating btn-small waves-effect waves-light teal decrement-btn" onclick="decrementAllDutyGaps()">
-                                            <i class="material-icons">arrow_downward</i>
-                                        </a>
-                                        <a class="btn-floating btn-small waves-effect waves-light teal increment-btn" onclick="incrementAllDutyGaps()">
-                                            <i class="material-icons">arrow_upward</i>
-                                        </a>
-                                    </th>
-                                    <th style="background-color: #f2f2f2; text-align: center;">Sil</th>
-                                </tr>
-                            </thead>
-                            <tbody id="personTable">
+                    <thead>
+                        <tr>
+                            ${groupingEnabled ? '<th style="background-color: #f2f2f2;">Grup</th>' : ''}
+                            <th style="background-color: #f2f2f2;">İsim</th>
+                            <th style="background-color: #f2f2f2;">Hafta İçi</th>
+                            <th style="background-color: #f2f2f2;">Hf Sonu</th>
+                            <th class="duty-gap-header" style="background-color: #f2f2f2;">
+                                ${isMobileDevice() ? '2 Nöbet<br>Arası Boşluk' : '2 Nöbet Arası Boşluk'}
+                                <a class="btn-floating btn-small waves-effect waves-light teal decrement-btn" onclick="decrementAllDutyGaps()">
+                                    <i class="material-icons">arrow_downward</i>
+                                </a>
+                                <a class="btn-floating btn-small waves-effect waves-light teal increment-btn" onclick="incrementAllDutyGaps()">
+                                    <i class="material-icons">arrow_upward</i>
+                                </a>
+                            </th>
+                            <th style="background-color: #f2f2f2; text-align: center;">Sil</th>
+                        </tr>
+                    </thead>
+                    <tbody id="personTable">
                 `;
-        
+
                 const groupCount = Math.ceil(persons.length / 2);
                 console.log('Group Count:', groupCount);
-        
+
                 persons.forEach((person, index) => {
                     let groupOptions = '<option value="0">Seç</option>';
                     for (let i = 1; i <= groupCount; i++) {
                         groupOptions += `<option value="${i}" ${person.group === i ? 'selected' : ''}>${i}</option>`;
                     }
-                    console.log('Group Options for', person.name, ':', groupOptions);
-        
+                    
+                  
                     html += `
                         <tr style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; background-color: #f9fafb; transition: background-color 0.2s;">
                             ${groupingEnabled && groupCount > 0 ? `
-                                <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
-                                    <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px; min-width: ${isMobileDevice() ? '50px' : '30px'}; display: block;" onchange="updateGroup(${index}, this.value)">
-                                        ${groupOptions}
-                                    </select>
-                                </td>
-                            ` : ''}
+                            <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
+                                <select style="height: 24px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 4px; padding: 0 4px; min-width: ${isMobileDevice() ? '50px' : '30px'}; display: block;" onchange="updateGroup(${index}, this.value)">
+                                    ${groupOptions}
+                                </select>
+                            </td>
+                        ` : ''}
                             <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box; font-family: 'Arial', sans-serif; color: #374151;">
-                                ${person.name}
+                                ${truncateName(person.name)}
                             </td>
                             <td style="height: 30px; min-height: 30px; max-height: 30px; overflow: hidden; vertical-align: middle; line-height: 30px; padding: 0 8px; box-sizing: border-box;">
                                 <input type="number" class="planning-input" min="0" 
@@ -1695,14 +1718,10 @@
                         </tr>
                     `;
                 });
-        
-                html += `
-                            </tbody>
-                        </table>
-                    </div>
-                `;
+
+                html += `</tbody>`;
                 tableContainer.innerHTML = html;
-        
+
                 const selects = tableContainer.querySelectorAll('select');
                 selects.forEach(select => {
                     select.style.display = 'block';
@@ -1982,7 +2001,7 @@
             html += '</tr>';
 
             persons.forEach((person, pIndex) => {
-                html += `<tr><td class="name-column">${person.name}</td>`;
+                html += `<tr><td class="name-column">${truncateName(person.name)}</td>`;
                 dates.forEach((dateObj, dIndex) => {
                     const isWeekend = dateObj.isWeekend;
                     const cellKey = `${pIndex}-${dIndex}`;
@@ -2133,11 +2152,34 @@
             dragStart = null;
         }
 
+        let isFirstClick = true; // İlk tıklamayı takip etmek için global değişken
+
         function handleCellClick(pIndex, dIndex) {
             const cellKey = `${pIndex}-${dIndex}`;
             const cell = document.querySelector(`td[data-pindex="${pIndex}"][data-dindex="${dIndex}"]`);
+        
+            // Mobil cihaz ve dikey mod kontrolü
+            if (isFirstClick && isMobileDevice() && window.innerWidth < window.innerHeight) {
+                // Telefonu titreştir
+                if (navigator.vibrate) {
+                    navigator.vibrate(200); // 200ms titreşim
+                }
+        
+                // Özel mToast uyarısı
+                M.Toast.dismissAll();
+                const toastHTML = '<span style="font-size: 1rem;">Takvim işaretlemeleri için yatay moda almanız önerilir</span>';
+                const toast = M.toast({
+                    html: toastHTML,
+                    displayLength: 6000,
+                    classes: 'shake' // Sallanma animasyonu için sınıf
+                });
+        
+                // İlk tıklamayı false yap
+                isFirstClick = false;
+            }
+        
             saveToHistory();
-
+        
             if (availabilityMode) {
                 unavailableCells[cellKey] = !unavailableCells[cellKey];
                 cell.classList.toggle('unavailable', unavailableCells[cellKey]);
@@ -2156,11 +2198,11 @@
                         const prevCellKey = `${pIndex}-${prevDay}`;
                         const nextCellKey = `${pIndex}-${nextDay}`;
                         const totalDays = document.querySelectorAll('th').length - 1;
-
+        
                         if ((prevDay >= 0 && selectedCells[prevCellKey]) || (nextDay < totalDays && selectedCells[nextCellKey])) {
                             M.toast({ html: `${persons[pIndex].name} için üst üste nöbet ataması tespit edildi!` });
                         }
-
+        
                         selectedCells[cellKey] = true;
                         cell.classList.add('selected');
                     }
