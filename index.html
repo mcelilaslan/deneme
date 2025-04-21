@@ -35,7 +35,7 @@
                M.Modal.init(modals);
            });
        </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+   <script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.full.min.js"></script>
    <style>
         body {
             background: url('background.png') #F5E9D9 !important;
@@ -2432,17 +2432,20 @@
                 M.toast({ html: 'Lütfen tarih seçin!' });
                 return;
             }
-
+        
             const [startDay, startMonth, startYear] = startInput.split('-').map(Number);
             const [endDay, endMonth, endYear] = endInput.split('-').map(Number);
             const start = new Date(startYear, startMonth - 1, startDay);
             const end = new Date(endYear, endMonth - 1, endDay);
             start.setHours(0, 0, 0, 0);
             end.setHours(0, 0, 0, 0);
-
+        
+            const holidayInput = document.getElementById('holidays').value;
+            const holidays = holidayInput ? holidayInput.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d)) : [];
+        
             const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
             const scheduleData = {};
-
+        
             for (let d = 0; d < days; d++) {
                 const currentDate = new Date(start);
                 currentDate.setDate(currentDate.getDate() + d);
@@ -2453,37 +2456,64 @@
                     scheduleData[dateStr].push(person);
                 });
             }
-
+        
             let maxAssignedPerDay = 0;
             for (const date in scheduleData) {
                 const assignedCount = scheduleData[date].length;
                 maxAssignedPerDay = Math.max(maxAssignedPerDay, assignedCount);
             }
             const columnCount = Math.max(dutyPerDay, maxAssignedPerDay);
-            const headers = ['Tarih'];
+        
+            // Stil eklenmiş veri dizisi
+            const styledData = [];
+        
+            // Başlık satırı (kalın)
+            const headers = [{ v: 'Tarih', t: 's', s: { font: { bold: true } } }];
             for (let i = 1; i <= columnCount; i++) {
-                headers.push(`Nöbetçi ${i}`);
+                headers.push({ v: `Nöbetçi ${i}`, t: 's', s: { font: { bold: true } } });
             }
-            const data = [headers];
-
+            styledData.push(headers);
+        
+            // Tarih ve nöbetçi satırları
             for (let d = 0; d < days; d++) {
                 const currentDate = new Date(start);
                 currentDate.setDate(currentDate.getDate() + d);
                 const dateStr = currentDate.toLocaleDateString('tr-TR');
-                const row = [dateStr];
+                const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+                const isHoliday = holidays.includes(currentDate.getDate());
+        
+                // Tarih hücresi için stil
+                let dateStyle = {};
+                if (isWeekend) {
+                    dateStyle.fill = { fgColor: { rgb: "E9E9E9" } }; // Gri arkaplan
+                }
+                if (isHoliday) {
+                    dateStyle.font = { color: { rgb: "FF0000" } }; // Kırmızı yazı
+                }
+                if (isWeekend && isHoliday) {
+                    dateStyle = {
+                        fill: { fgColor: { rgb: "E9E9E9" } },
+                        font: { color: { rgb: "FF0000" } }
+                    };
+                }
+        
+                const row = [{ v: dateStr, t: 's', s: dateStyle }]; // Tarih string olarak
                 const assigned = scheduleData[dateStr] || [];
                 for (let i = 0; i < columnCount; i++) {
-                    row.push(assigned[i] || '');
+                    row.push({ v: assigned[i] || '', t: 's', s: {} }); // Nöbetçi hücreleri stil olmadan
                 }
-                data.push(row);
+                styledData.push(row);
             }
-
-            const ws = XLSX.utils.aoa_to_sheet(data);
+        
+            // Çalışma sayfasını oluştur
+            const ws = XLSX.utils.aoa_to_sheet(styledData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Nöbet Listesi");
+        
+            // Dosyayı oluştur ve indir
             const blob = new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })], { type: 'application/octet-stream' });
             const fileName = `nobet_listesi_${new Date().toISOString().split('T')[0]}.xlsx`;
-
+        
             if (callback) callback(blob, fileName);
         }
 
