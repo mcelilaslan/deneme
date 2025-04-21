@@ -759,7 +759,7 @@
         }
     }
 
-        .m-toast.shake {
+       .toast.shake {
             animation: shake 0.5s ease-in-out 3; /* 3 kez sallanır */
         }
         
@@ -2152,7 +2152,7 @@
             dragStart = null;
         }
 
-        let isFirstClick = true; // İlk tıklamayı takip etmek için global değişken
+       let isFirstClick = true; // İlk tıklamayı takip etmek için global değişken
 
         function handleCellClick(pIndex, dIndex) {
             const cellKey = `${pIndex}-${dIndex}`;
@@ -2173,6 +2173,14 @@
                     displayLength: 6000,
                     classes: 'shake' // Sallanma animasyonu için sınıf
                 });
+        
+                // Toast elementine shake sınıfını manuel olarak ekle
+                setTimeout(() => {
+                    const toastElement = document.querySelector('.toast');
+                    if (toastElement) {
+                        toastElement.classList.add('shake');
+                    }
+                }, 0);
         
                 // İlk tıklamayı false yap
                 isFirstClick = false;
