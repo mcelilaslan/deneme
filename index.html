@@ -2424,7 +2424,7 @@
             }
         }
 
-        function performExport(callback) {
+       function performExport(callback) {
             const startInput = document.getElementById('startDate').value;
             const endInput = document.getElementById('endDate').value;
             const dutyPerDay = parseInt(document.getElementById('dutyPerDay').value) || 1;
@@ -2467,10 +2467,10 @@
             // Stil eklenmiş veri dizisi
             const styledData = [];
         
-            // Başlık satırı (kalın)
-            const headers = [{ v: 'Tarih', t: 's', s: { font: { bold: true } } }];
+            // Başlık satırı (kalın, %50 daha büyük font)
+            const headers = [{ v: 'Tarih', t: 's', s: { font: { bold: true, sz: 16 } } }];
             for (let i = 1; i <= columnCount; i++) {
-                headers.push({ v: `Nöbetçi ${i}`, t: 's', s: { font: { bold: true } } });
+                headers.push({ v: `Nöbetçi ${i}`, t: 's', s: { font: { bold: true, sz: 16 } } });
             }
             styledData.push(headers);
         
@@ -2483,30 +2483,37 @@
                 const isHoliday = holidays.includes(currentDate.getDate());
         
                 // Tarih hücresi için stil
-                let dateStyle = {};
+                let dateStyle = { font: { bold: true, sz: 16 } }; // Tüm tarihler kalın ve %50 daha büyük
                 if (isWeekend) {
-                    dateStyle.fill = { fgColor: { rgb: "E9E9E9" } }; // Gri arkaplan
+                    dateStyle.fill = { fgColor: { rgb: "808080" } }; // Daha koyu gri arkaplan
                 }
                 if (isHoliday) {
-                    dateStyle.font = { color: { rgb: "FF0000" } }; // Kırmızı yazı
+                    dateStyle.font = { bold: true, sz: 16, color: { rgb: "FF0000" } }; // Kırmızı yazı
                 }
                 if (isWeekend && isHoliday) {
                     dateStyle = {
-                        fill: { fgColor: { rgb: "E9E9E9" } },
-                        font: { color: { rgb: "FF0000" } }
+                        fill: { fgColor: { rgb: "808080" } },
+                        font: { bold: true, sz: 16, color: { rgb: "FF0000" } }
                     };
                 }
         
                 const row = [{ v: dateStr, t: 's', s: dateStyle }]; // Tarih string olarak
                 const assigned = scheduleData[dateStr] || [];
                 for (let i = 0; i < columnCount; i++) {
-                    row.push({ v: assigned[i] || '', t: 's', s: {} }); // Nöbetçi hücreleri stil olmadan
+                    row.push({ v: assigned[i] || '', t: 's', s: { font: { sz: 16 } } }); // Nöbetçi hücreleri %50 daha büyük
                 }
                 styledData.push(row);
             }
         
             // Çalışma sayfasını oluştur
             const ws = XLSX.utils.aoa_to_sheet(styledData);
+        
+            // Sütun genişliklerini ayarla (font büyüklüğüne uyum için artırıldı)
+            ws['!cols'] = [
+                { wch: 14 }, // Tarih sütunu (A sütunu, font büyüklüğü için 14 karakter)
+                ...Array(columnCount).fill({ wch: 22 }) // Nöbetçi sütunları (22 karakter)
+            ];
+        
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Nöbet Listesi");
         
@@ -2516,7 +2523,7 @@
         
             if (callback) callback(blob, fileName);
         }
-
+        
         function downloadSchedule() {
 
             // Takvim doluluk kontrolü
