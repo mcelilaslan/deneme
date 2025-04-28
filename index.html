@@ -762,6 +762,14 @@
        .toast.shake {
             animation: shake 0.5s ease-in-out 3; /* 3 kez sallanır */
         }
+
+        #arrowIndicator {
+            position: fixed;
+            display: none;
+            z-index: 1000;
+            font-size: 24px;
+            color: #26a69a; /* Materialize teal rengi */
+        }
         
         @keyframes glow {
             0% {
@@ -1261,6 +1269,11 @@
         </div>
         <span style="color: white; margin-left: 10px; font-size: 1.2rem;">Nöbetler Atanıyor...</span>
     </div>
+
+    <div id="arrowIndicator" style="position: fixed; display: none; z-index: 1000;">
+        <i class="material-icons">arrow_right</i>
+    </div>    
+
    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         let persons = [];
@@ -1452,6 +1465,53 @@
                 M.toast({ html: 'Yatay modda daha iyi bir deneyim elde edebilirsiniz!(Masaüstü kullanım önerilir)' });
             }
         
+            const arrowIndicator = document.getElementById('arrowIndicator');
+            const modeSwitch = document.getElementById('modeSwitch');
+            const calendarCollapsible = M.Collapsible.getInstance(document.getElementById('calendarCollapsible'));
+        
+            function updateArrowPosition() {
+                const switchRect = modeSwitch.getBoundingClientRect();
+                const containerRect = document.getElementById('calendarCollapsible').getBoundingClientRect();
+        
+                arrowIndicator.style.top = (switchRect.top + window.scrollY + (switchRect.height / 2) - 12) + 'px';
+                arrowIndicator.style.left = (containerRect.left - 30) + 'px';
+            }
+        
+            function showArrow() {
+                arrowIndicator.style.display = 'block';
+                updateArrowPosition();
+            }
+        
+            function hideArrow() {
+                arrowIndicator.style.display = 'none';
+            }
+        
+            calendarCollapsible.el.addEventListener('open', function() {
+                if (!modeSwitch.checked) {
+                    showArrow();
+                }
+            });
+        
+            calendarCollapsible.el.addEventListener('close', hideArrow);
+        
+            modeSwitch.addEventListener('change', hideArrow);
+        
+            window.addEventListener('scroll', function() {
+                if (arrowIndicator.style.display === 'block') {
+                    updateArrowPosition();
+                }
+            });
+            window.addEventListener('resize', function() {
+                if (arrowIndicator.style.display === 'block') {
+                    updateArrowPosition();
+                }
+            });
+        
+            if (calendarCollapsible.el.classList.contains('active')) {
+                showArrow();
+            }
+
+            
             // Tarih seçiciler için olay dinleyicileri
             const startDatePicker = document.getElementById('startDate');
             const endDatePicker = document.getElementById('endDate');
